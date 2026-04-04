@@ -39,7 +39,7 @@ void PreviewObjectColors::onEditor() {
 }
 
 void PreviewObjectColors::onSave() {
-    alpha::level_storage::setSavedValue(m_editorLayer, "color-object", m_defaultObject->getSaveString(m_editorLayer));
+    alpha::level_storage::setSavedValue(m_editorLayer, "color-object", std::string(m_defaultObject->getSaveString(m_editorLayer)));
 }
 
 void PreviewObjectColors::onUpdateButtons() {
