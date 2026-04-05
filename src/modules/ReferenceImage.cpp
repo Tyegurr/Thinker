@@ -11,9 +11,10 @@ void ReferenceImage::onEditor() {
 }
 
 void ReferenceImage::reloadButtonBar(EditButtonBar* buttonBar) {
-    auto rows = GameManager::get()->getIntGameVariable("0049");
-    auto cols = GameManager::get()->getIntGameVariable("0050");
-    buttonBar->reloadItems(rows, cols);
+    auto cols = GameManager::get()->getIntGameVariable(GameVar::EditorButtonsPerRow);
+    auto rows = GameManager::get()->getIntGameVariable(GameVar::EditorButtonRows);
+
+    buttonBar->reloadItems(cols, rows);
 }
 
 bool RICustomizeObjectLayer::init(GameObject* object, CCArray* objectArray) {

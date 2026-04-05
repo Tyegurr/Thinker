@@ -88,7 +88,7 @@ void ObjectNames::downloadNames() {
             std::filesystem::path objectNames = Mod::get()->getSaveDir() / "objects.csv";
             auto writeRes = utils::file::writeString(objectNames, strRes.unwrap());
             if (!writeRes) {
-                log::error("failed to write object names");
+                log::error("Failed to write object names");
             }
             
             loadNames(strRes.unwrap());
@@ -101,6 +101,10 @@ Result<std::string_view> ObjectNames::getName(unsigned int id) {
     if (iter == m_names.end()) return Err("Name not found for ID");
 
     return Ok(std::string_view(iter->second));
+}
+
+const std::unordered_map<unsigned int, std::string>& ObjectNames::getNames() {
+    return m_names;
 }
 
 int ObjectNames::checkVersion() {

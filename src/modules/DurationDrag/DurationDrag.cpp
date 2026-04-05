@@ -1,8 +1,6 @@
 #include "DurationDrag.hpp"
 #include "Utils.hpp"
 
-$incompatible("undefined0.bendy_duration_lines")
-
 using namespace tinker::ui;
 
 void DDSetGroupIDLayer::onClose(cocos2d::CCObject* sender) {

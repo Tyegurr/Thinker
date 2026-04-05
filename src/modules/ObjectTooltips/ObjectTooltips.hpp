@@ -2,8 +2,8 @@
 
 #include "../../Module.hpp"
 #include <Geode/ui/NineSlice.hpp>
-#include <alphalaneous.alphas-ui-pack/include/API.hpp>
 #include <Geode/modify/CreateMenuItem.hpp>
+#include <alphalaneous.alphas-ui-pack/include/API.hpp>
 
 using namespace alpha::prelude;
 
@@ -37,5 +37,6 @@ namespace tinker::ui {
         CreateMenuItem* m_activeItem = nullptr;
         geode::NineSlice* m_tooltipBG;
         CCLabelBMFont* m_tooltipLabel;
+        CCLabelBMFont* m_tooltipIDLabel;
     };
 }

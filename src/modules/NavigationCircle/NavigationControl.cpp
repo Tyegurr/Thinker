@@ -1,7 +1,7 @@
 #include "NavigationControl.hpp"
 #include "JoystickNavigation.hpp"
-#include <alphalaneous.alphas-ui-pack/include/Utils.hpp>
 #include "../CanvasRotate/CanvasRotate.hpp"
+#include <alphalaneous.alphas-ui-pack/include/Utils.hpp>
 
 using namespace tinker::ui;
 
@@ -43,7 +43,7 @@ bool NavigationControl::init(EditorUI* editorUI, float opacity, float scale) {
 
     m_circle->addChild(m_joystick);
 
-    if (CanvasRotate::getSetting<bool, "enabled">()) {
+    if (CanvasRotate::isEnabled()) {
         m_rotateGrabber = CCSprite::create("joystick-rotation-handle.png"_spr);
         m_rotateGrabber->setScale(1.0f);
         m_rotateGrabber->setPosition(m_circle->getContentSize() / 2);

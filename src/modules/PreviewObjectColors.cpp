@@ -23,7 +23,7 @@ void PreviewObjectColors::onEditor() {
 
     onUpdateButtons();
 
-    if (ScrollableObjects::getSetting<bool, "enabled">()) {
+    if (ScrollableObjects::isEnabled()) {
         for (auto child : m_editorUI->getChildrenExt()) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(child)) {
                 if (!bar->m_hasCreateItems) continue;
@@ -43,7 +43,7 @@ void PreviewObjectColors::onSave() {
 }
 
 void PreviewObjectColors::onUpdateButtons() {
-    if (!ScrollableObjects::getSetting<bool, "enabled">()) {
+    if (!ScrollableObjects::isEnabled()) {
         m_editorUI->m_editObjectBtn->setOpacity(255);
         m_editorUI->m_editObjectBtn->setColor({255, 255, 255});
         m_editorUI->m_editObjectBtn->m_animationEnabled = true;
@@ -51,7 +51,7 @@ void PreviewObjectColors::onUpdateButtons() {
 }
 
 void POCEditorUI::editObject(cocos2d::CCObject* sender) {
-    if (ScrollableObjects::getSetting<bool, "enabled">()) return EditorUI::editObject(sender);
+    if (ScrollableObjects::isEnabled()) return EditorUI::editObject(sender);
 
     if (!m_selectedObject && (!m_selectedObjects || m_selectedObjects->count() == 0)) {
         auto customizeObjectLayer = CustomizeObjectLayer::create(PreviewObjectColors::get()->m_defaultObject, nullptr);

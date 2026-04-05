@@ -14,6 +14,7 @@ class $editorModule(LiveColors) {
     int m_availableBtnCount = 0;
 
     void onEditor() override;
+    void showMenu(bool show);
 };
 
 class $modify(LCEditorUI, EditorUI) {

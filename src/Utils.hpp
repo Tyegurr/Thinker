@@ -162,6 +162,23 @@ namespace tinker::utils {
         }
     }
 
+    inline std::vector<std::string> split(const std::string& str, const std::string& delimiter, int limit = -1) {
+        std::vector<std::string> result;
+        size_t start = 0;
+        size_t end = str.find(delimiter);
+        int count = 0;
+
+        while (end != std::string::npos && (count < limit - 1 || limit == -1)) {
+            result.push_back(str.substr(start, end - start));
+            start = end + delimiter.length();
+            end = str.find(delimiter, start);
+            count++;
+        }
+
+        result.push_back(str.substr(start));
+        return result;
+    }
+
     template <geode::utils::string::ConstexprString A, geode::utils::string::ConstexprString B>
     consteval auto concat2() {
         geode::utils::string::ConstexprString<> out{};
@@ -179,18 +196,4 @@ namespace tinker::utils {
         else
             return concat2<First, concat<Rest...>()>();
     }
-}
-
-#define $incompatible(modID)                                        \
-$execute {                                                      \
-    Mod::get()->setSavedValue(modID "-loaded", false);          \
-    auto mod = Loader::get()->getInstalledMod(modID);           \
-    if (!mod) return;                                           \
-    if (mod->isLoaded()) {                                      \
-        Mod::get()->setSavedValue(modID "-loaded", true);       \
-        return;                                                 \
-    }                                                           \
-    ModStateEvent(ModEventType::Loaded, mod).listen([]() {      \
-        Mod::get()->setSavedValue(modID "-loaded", true);       \
-    }).leak();                                                  \
 }

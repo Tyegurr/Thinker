@@ -2,8 +2,6 @@
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 #include <alphalaneous.alphas_geode_utils/include/ObjectModify.hpp>
 
-$incompatible("razoom.object_groups")
-
 bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
     if (!EditorUI::init(editorLayer)) return false;
 
@@ -23,8 +21,23 @@ bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
         if (!ebb) return;
         auto scrollEbb = static_cast<SOEditButtonBar*>(ebb);
         auto scrollEbbFields = scrollEbb->m_fields.self();
+
+        if (!scrollEbbFields->m_scrollLayer) return;
         scrollEbb->cull(scrollEbbFields, scrollEbbFields->m_scrollLayer->getScrollPoint().x);
     });
+
+    runAction(CallFuncExt::create([this] {
+
+        auto cols = GameManager::get()->getIntGameVariable(GameVar::EditorButtonsPerRow);
+        auto rows = GameManager::get()->getIntGameVariable(GameVar::EditorButtonRows);
+
+        for (auto tab : alpha::editor_tabs::getAllTabs().unwrap()) {
+            auto bar = typeinfo_cast<EditButtonBar*>(tab);
+            if (bar) {
+                bar->reloadItems(cols, rows);
+            }
+        }
+    }));
 
     return true;
 }
@@ -64,20 +77,44 @@ void SOEditorUI::updateCreateMenu(bool selectTab) {
         if (!cmi) return;
 
         auto menu = cmi->getParent();
-        auto content = static_cast<alpha::ui::ScrollContent*>(menu->getParent());
+        auto content = typeinfo_cast<alpha::ui::ScrollContent*>(menu->getParent());
+        if (!content) return;
 
         auto worldPos = menu->convertToWorldSpace(cmi->getPosition());
         auto nodePos = content->convertToNodeSpace(worldPos);
 
         auto scrollLayer = content->getScrollLayer();
+        if (!scrollLayer) return;
+
         scrollLayer->setScrollX(nodePos.x - scrollLayer->getContentWidth() / 2, true);
     }
 }
 
-void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int rows, bool keepPage) {
-    EditButtonBar::loadFromItems(objects, 1, 1, keepPage);
+EditButtonBar* SOEditButtonBar::create(cocos2d::CCArray* objects, cocos2d::CCPoint position, int tab, bool hasCreateItems, int columns, int rows) {
+    auto ret = EditButtonBar::create(objects, position, tab, hasCreateItems, columns, rows);
+    ret->setUserFlag("alphalaneous.editortab_api/disable-rewrite");
+    return ret;
+}
 
+void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int rows, bool keepPage) {
     auto fields = m_fields.self();
+
+    if (!m_pagesArray) {
+        m_pagesArray = CCArray::create();
+        m_pagesArray->retain();
+    }
+    if (!m_scrollLayer) {
+        m_scrollLayer = BoomScrollLayer::create(m_pagesArray, 0, false);
+        fields->m_dummyScrollLayer = m_scrollLayer;
+    }
+
+    objects->retain();
+
+    if (m_buttonArray) {
+        m_buttonArray->release();
+    }
+
+    m_buttonArray = objects;
 
     float currentX = 0;
 
@@ -107,11 +144,32 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
         fields->m_widthOffset = -26.f;
     }
 
-    auto size = m_scrollLayer->getContentSize() + CCSize{fields->m_widthOffset, -18};
+    setUserFlag("alphalaneous.editortab_api/disable-rewrite");
+    setAnchorPoint({0.5f, 0.f});
 
-    auto menu = getChildByType<CCMenu>(0);
-    if (menu) {
-        menu->setVisible(false);
+    auto editorUI = EditorUI::get();
+    if (!editorUI) return;
+
+    fields->m_initialized = true;
+
+    auto widthOffset = 180;
+
+    auto spacerLeft = editorUI->getChildByID("spacer-line-left");
+    auto spacerRight = editorUI->getChildByID("spacer-line-right");
+
+    if (spacerLeft && spacerRight) {
+        widthOffset = spacerLeft->getPositionX() + (editorUI->getContentWidth() - spacerRight->getPositionX());
+    }
+
+    auto size = CCSize{(editorUI->getContentWidth() - widthOffset) / getScale(), editorUI->m_toolbarHeight / getScale()};
+    setContentSize(size);
+
+    if (spacerLeft && spacerRight) {
+        float x = (spacerLeft->getPositionX() + spacerRight->getPositionX()) / 2;
+        setPosition({x, 0});
+    }
+    else {
+        setPosition({getContentWidth() / 2, 0});
     }
 
     auto dots = getChildByID("alphalaneous.editortab_api/dots");
@@ -119,51 +177,66 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
         dots->setVisible(false);
     }
 
-    m_scrollLayer->setVisible(false);
+    auto newSize = CCSize{size.width + fields->m_widthOffset, size.height - 18.f};
 
     float gap = 5.f;
     float height = rows * (40.f + gap) - gap; 
 
-    float scale = size.height / height;
+    float scale = (newSize.height) / height;
     fields->m_rows = rows;
 
+
     fields->m_objectsMenu = CCMenu::create();
-    fields->m_objectsMenu->setContentSize({size.width, height});
+    fields->m_objectsMenu->setContentSize({newSize.width, height});
     fields->m_objectsMenu->setScale(scale);
     fields->m_objectsMenu->setAnchorPoint({0.f, 0.f});
     fields->m_objectsMenu->setPosition({0, 0});
     fields->m_objectsMenu->setID("items-menu"_spr);
 
-    auto columnLayout = ColumnLayout::create();
-    columnLayout->setAutoScale(false);
-    columnLayout->setGrowCrossAxis(true);
-    columnLayout->setAxisReverse(true);
-    columnLayout->setCrossAxisReverse(true);
-    columnLayout->ignoreInvisibleChildren(false);
-    columnLayout->setAxisAlignment(AxisAlignment::End);
-    columnLayout->setGap(gap);
-
-    fields->m_objectsMenu->setLayout(columnLayout);
-
     std::vector<Ref<CreateMenuItem>> customControls;
 
     int rIdx = objects->count();
+
+    int rowIdx = 0;
+    int colIdx = 0;
+
+    float width = 0;
+
     for (auto object : objects->asExt<CCNode>()) {
         rIdx--;
-        object->removeFromParent();
+        object->removeFromParentAndCleanup(false);
         object->setScale(1);
         object->setVisible(true);
+        if (auto item = typeinfo_cast<CCMenuItemSpriteExtra*>(object)) {
+            item->m_baseScale = 1.f;
+        }
+
         if (m_tabIndex == 13 && rIdx < 4) {
             customControls.push_back(static_cast<CreateMenuItem*>(object));
             continue;
         }
+
+        object->setPosition({object->getContentWidth() / 2 + (object->getContentWidth() + gap) * colIdx, fields->m_objectsMenu->getContentHeight() - object->getContentHeight() / 2 - (object->getContentHeight() + gap) * rowIdx});
+
+        if (rowIdx == 0) {
+            width += object->getContentWidth() + gap;
+        }
+
         fields->m_objectsMenu->addChild(object);
+
+        rowIdx++;
+        if (rowIdx == rows) {
+            rowIdx = 0;
+            colIdx++;
+        }
     }
 
-    fields->m_objectsMenu->updateLayout();
+    width -= gap;
 
-    fields->m_scrollLayer = alpha::ui::AdvancedScrollLayer::create(size);
-    fields->m_scrollLayer->setPosition({0, m_scrollLayer->getPositionY() + 3.f});
+    fields->m_objectsMenu->setContentSize({width, height});
+
+    fields->m_scrollLayer = alpha::ui::AdvancedScrollLayer::create(newSize);
+    fields->m_scrollLayer->setPosition({0, getContentHeight() / 2 + 3.f});
     fields->m_scrollLayer->setAnchorPoint({0.f, 0.5f});
     fields->m_scrollLayer->setHorizontalScroll(true);
     fields->m_scrollLayer->setHorizontalScrollWheel(true);
@@ -187,16 +260,16 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
 
     fields->m_scrollBar = alpha::ui::AdvancedScrollBar::create(fields->m_scrollLayer, alpha::ui::ScrollOrientation::HORIZONTAL);
     fields->m_scrollBar->setContentWidth(10);
-    fields->m_scrollBar->setContentHeight(size.width - 10);
+    fields->m_scrollBar->setContentHeight(newSize.width - 10);
     fields->m_scrollBar->setPosition(fields->m_scrollBar->getPosition() + CCPoint{0, 4});
     fields->m_scrollBar->setID("buttons-scroll-bar"_spr);
 
     addChild(fields->m_scrollLayer);
     addChild(fields->m_scrollBar);
 
-    CCNode* spacerStart = CCNode::create();
+    auto spacerStart = CCNode::create();
     spacerStart->setContentSize({10, fields->m_scrollLayer->getContentHeight() - 5});
-    CCNode* spacerEnd = CCNode::create();
+    auto spacerEnd = CCNode::create();
     spacerEnd->setContentSize({10, fields->m_scrollLayer->getContentHeight() - 5});
 
     fields->m_scrollLayer->addChild(spacerStart);
@@ -207,8 +280,8 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
 
     fields->m_scrollLayer->setScrollX(currentX);
 
-    float width = 40.f + gap;
-    fields->m_cols = std::ceil((fields->m_scrollLayer->getContentWidth() / fields->m_objectsMenu->getScale()) / width);
+    float btnWidth = 40.f + gap;
+    fields->m_cols = std::ceil((fields->m_scrollLayer->getContentWidth() / fields->m_objectsMenu->getScale()) / btnWidth);
 
     bool larger = fields->m_scrollLayer->getContentLayer()->getScaledContentWidth() > fields->m_scrollLayer->getContentWidth();
 
@@ -217,13 +290,18 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
 
         fields->m_scrollLayout->setAxisAlignment(AxisAlignment::Center);
 
-        columnLayout->setAxis(Axis::Row);
-        columnLayout->setAutoGrowAxis(std::nullopt);
-        columnLayout->setAxisReverse(false);
-        columnLayout->setCrossAxisReverse(false);
-        columnLayout->setAxisAlignment(AxisAlignment::Start);
+        auto rowLayout = RowLayout::create();
+        rowLayout->setAutoScale(false);
+        rowLayout->setGrowCrossAxis(true);
+        rowLayout->ignoreInvisibleChildren(false);
+        rowLayout->setGap(gap);
+        rowLayout->setAxis(Axis::Row);
+        rowLayout->setAutoGrowAxis(std::nullopt);
+        rowLayout->setAxisReverse(false);
+        rowLayout->setCrossAxisReverse(false);
+        rowLayout->setAxisAlignment(AxisAlignment::Start);
 
-        fields->m_objectsMenu->updateLayout();
+        fields->m_objectsMenu->setLayout(rowLayout);
 
         float maxX = 0;
 
@@ -265,10 +343,12 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     }
 
     fields->m_world = alpha::utils::rectToWorld(fields->m_scrollLayer);
+
+    cull(fields, fields->m_scrollLayer->getScrollPoint().x);
 }
 
 void SOEditButtonBar::cull(SOEditButtonBar::Fields* fields, float x) {
-    if (!nodeIsVisible(fields->m_scrollLayer)) return;
+    if (!fields->m_initialized) return;
 
     auto& visibleNodes = fields->m_visibleNodes;
     visibleNodes.clear();
@@ -307,6 +387,7 @@ void SOEditButtonBar::cull(SOEditButtonBar::Fields* fields, float x) {
 
 void SOEditButtonBar::createExtrasMenu() {
     auto fields = m_fields.self();
+    if (!fields->m_initialized) return;
     
     fields->m_extrasMenuContainer = CCNode::create();
     fields->m_extrasMenuContainer->setPosition({getContentWidth() - 2.5f, getContentHeight() / 2});
@@ -350,8 +431,11 @@ void SOEditButtonBar::addToExtrasMenu(CCMenuItemSpriteExtra* button) {
     if (m_tabIndex == 13) return;
 
     auto fields = m_fields.self();
+    
     fields->m_extrasButtons.push_back(button);
     fields->m_widthOffset = -26.f;
+
+    if (!fields->m_initialized) return;
 
     fields->m_separator->setVisible(true);
 
@@ -360,7 +444,7 @@ void SOEditButtonBar::addToExtrasMenu(CCMenuItemSpriteExtra* button) {
     fields->m_extrasMenu->addChild(button);
     fields->m_extrasMenu->updateLayout();
 
-    auto size = m_scrollLayer->getContentSize() + CCSize{fields->m_widthOffset, -18};
+    auto size = fields->m_scrollLayer->getContentSize() + CCSize{fields->m_widthOffset, -18};
 
     fields->m_scrollLayer->setContentWidth(size.width);
     fields->m_scrollBar->setContentHeight(size.width - 10);

@@ -12,15 +12,19 @@
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
-		"geode.node-ids": "v1.20.0",
-		"alphalaneous.good_grid": "v1.0.1-beta.1",
-		"alphalaneous.alphas_geode_utils": "v1.2.0-beta.2",
+		"geode.node-ids": "v1.23.3",
+		"alphalaneous.good_grid": "v1.1.4",
+		"alphalaneous.alphas_geode_utils": "v1.2.4",
 		"alphalaneous.alphas-ui-pack": "v1.0.7",
-		"alphalaneous.editortab_api": "v2.0.0-alpha.1",
+		"alphalaneous.editortab_api": "v2.0.12",
 		"alphalaneous.level-storage-api": "v1.0.0",
 		"spaghettdev.named-editor-groups": {
-			"version": "v2.0.0",
+			"version": "v2.4.1",
             "required": false
+		},
+		"raydeeux.gameobjectidstacksize": {
+			"version": "v1.0.9",
+			"required": false
 		}
 	},
 	"resources": {
@@ -81,12 +85,6 @@
 			"name": "Preview Object Colors",
 			"description": "Preview a color channel on the object buttons in the build tab."
 		},
-		"ObjectSearch-enabled": {
-			"type": "bool",
-			"default": true,
-			"name": "Object Name Search",
-			"description": "Look up objects by name. Adds an all objects tab with search."
-		},
 		"QuickExtras-enabled": {
 			"type": "bool",
 			"default": true,
@@ -104,7 +102,7 @@
 			"default": true,
 			"name": "Enable Scrollable Objects",
 			"description": "Scroll through objects instead of navigating per page in the build tab.",
-			"enable-if": "!saved:razoom.object_groups-loaded",
+			"enable-if": "!loaded:razoom.object_groups",
 			"enable-if-description": "This feature is not compatible with Object Groups."
 		},
 		"objects-title": {
@@ -121,7 +119,7 @@
 			"default": true,
 			"name": "Enable Duration Dragging",
 			"description": "Drag on a duration line to change the duration without going into a trigger's edit menu.",
-			"enable-if": "!saved:undefined0.bendy_duration_lines-loaded",
+			"enable-if": "!loaded:undefined0.bendy_duration_lines",
 			"enable-if-description": "This feature is not compatible with Bendy Duration Lines."
 		},
 		"MultiTextEdit-enabled": {
@@ -129,6 +127,14 @@
 			"default": true,
 			"name": "Enable Multi Text Edit",
 			"description": "Edit multiple text objects at once."
+		},
+		"ObjectSearch-enabled": {
+			"type": "bool",
+			"default": true,
+			"name": "Object Name Search",
+			"description": "Look up objects by name. Adds an all objects tab with search.",
+			"enable-if": "!loaded:razoom.object_groups",
+			"enable-if-description": "This feature is not compatible with Object Groups."
 		},
 		"ObjectSummary-enabled": {
 			"type": "bool",
@@ -189,6 +195,22 @@
 			"default": false,
 			"name": "Hide IDs in the Edit Level screen",
 			"description": "Hide IDs in Edit Level screen, hold shift to show them."
+		},
+		"other-mods-title": {
+			"type": "title",
+			"name": "Other Mods"
+		},
+		"other-mods-description": {
+			"type": "info",
+			"description": "Changes Tinker can make to better integrate other mods with Tinker itself."	
+		},
+		"AlternateLassoLocation-enabled": {
+			"type": "bool",
+			"name": "Alternate Lasso Select Location",
+			"description": "Move the Lasso Select button to the bottom right.",
+			"default": true,
+			"enable-if": "loaded:undefined0.lasso-select",
+			"enable-if-description": "This feature requires the Lasso Select mod."
 		},
 		"AutoBuildHelper-title": {
 			"type": "title",

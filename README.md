@@ -16,6 +16,22 @@
 
 ---
 
+## Recommendations
+
+Sometimes, your experience with one mod can be improved by having other mods installed as well. I recommend the following mods alongside Tinker.
+
+---
+
+<mod:hjfod.betteredit>
+
+<c-dddddd>When using Tinker, it is highly recommended to use BetterEdit's UI Scale setting at a value of 0.9 or lower.</c>
+
+---
+
+<mod:undefined0.lasso-select>
+
+---
+
 ## Interface
 Customize different aspects of the editor's interface.
 
@@ -79,6 +95,10 @@ All things related to objects.
 ### ​  Multi Text Edit
 - <c-dddddd>Allows for you to edit multiple text objects at once.</c>
 
+### ​  Object Search
+- <c-dddddd>Adds a new search tab for objects. In this tab, you will see every object and be able to search by name.</c>
+- <c-dddddd>You can fine tune your search and search by object ID by starting the search with `id:`, or by an exact name with `exact:`.</c>
+
 ### ​  Object Summary
 - <c-dddddd>Adds a button in the level settings to view how many of each object there are.</c>
 
@@ -125,6 +145,17 @@ Stuff that just doesn't fit in any other category.
 
 ---
 
+## Other Mods
+Changes Tinker can make to better integrate other mods with Tinker itself.
+
+---
+
+### ​  Alternate Lasso Select Location
+- <cy>Requires Lasso Select Mod.</c>
+- <c-dddddd>Moves the Lasso Select button to the bottom right.</c>
+
+---
+
 ## API
 Tools to interface with this mod as a mod developer.
 
@@ -155,7 +186,7 @@ Cool people that helped with the making of this mod.
 ---
 
 ### ​  Mat
-- <c-dddddd>Original Reference Image concept<c>
+- <c-dddddd>Original Reference Image concept</c>
 
 ---
 

@@ -1,5 +1,4 @@
 #include "AwesomeModifierIcons.hpp"
-#include <ranges>
 
 std::unordered_map<int, std::string> AwesomeModifierIcons::s_textureMap = {
     {1755, "d_block.png"_spr},

@@ -1,7 +1,7 @@
 #include "ObjectTooltips.hpp"
-#include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 #include "../../ObjectNames.hpp"
 #include "../ScrollableObjects.hpp"
+#include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 
 using namespace tinker::ui;
 
@@ -50,8 +50,19 @@ bool TooltipHover::init() {
     m_tooltipLabel = CCLabelBMFont::create("", "chatFont.fnt");
     m_tooltipLabel->setScale(0.5f);
     m_tooltipLabel->setID("tooltip-label"_spr);
+    m_tooltipLabel->setAnchorPoint({0.f, 1.f});
 
     m_tooltipBG->addChild(m_tooltipLabel);
+
+    if (ObjectTooltips::getSetting<bool, "show-object-id">()) {
+        m_tooltipIDLabel = CCLabelBMFont::create("", "chatFont.fnt");
+        m_tooltipIDLabel->setScale(0.4f);
+        m_tooltipIDLabel->setID("tooltip-id-label"_spr);
+        m_tooltipIDLabel->setColor({0, 255, 0});
+        m_tooltipIDLabel->setAnchorPoint({0.f, 0.f});
+
+        m_tooltipBG->addChild(m_tooltipIDLabel);
+    }
 
     return true;
 }
@@ -70,7 +81,7 @@ bool TooltipHover::clickBegan(TouchEvent* touch) {
 }
 
 void TooltipHover::clickEnded(TouchEvent* touch) {
-    if (m_activeItem) {
+    if (m_activeItem && m_activeItem->m_objectID > 0) {
         m_tooltipBG->setVisible(true);
         auto bb = m_activeItem->boundingBox();
 
@@ -170,10 +181,20 @@ void TooltipHover::showTooltip(CreateMenuItem* item) {
     auto positionHere = convertToNodeSpace(positionWorld);
     m_tooltipLabel->setString(std::string(name).c_str());
 
-    m_tooltipBG->setPosition(positionHere);
-    m_tooltipBG->setContentSize(m_tooltipLabel->getScaledContentSize() + CCSize{5, 5});
+    float heightOffset = 0;
+    if (ObjectTooltips::getSetting<bool, "show-object-id">()) {
+        m_tooltipIDLabel->setString(numToString(item->m_objectID).c_str());
+        heightOffset = m_tooltipIDLabel->getScaledContentHeight();
+    }
 
-    m_tooltipLabel->setPosition(m_tooltipBG->getContentSize() / 2);
+    m_tooltipBG->setPosition(positionHere);
+    m_tooltipBG->setContentSize(m_tooltipLabel->getScaledContentSize() + CCSize{5, 5 + heightOffset});
+
+    m_tooltipLabel->setPosition({2.5f, m_tooltipBG->getContentHeight() - 2.5f});
+
+    if (ObjectTooltips::getSetting<bool, "show-object-id">()) {
+        m_tooltipIDLabel->setPosition({2.5f, 2.5f});
+    }
 
     if (!m_clicking) {
         m_tooltipBG->setVisible(true);

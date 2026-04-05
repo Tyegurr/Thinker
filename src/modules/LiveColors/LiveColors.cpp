@@ -49,10 +49,13 @@ void LiveColors::onEditor() {
     }));
 }
 
+void LiveColors::showMenu(bool show) {
+    m_colorsMenu->setVisible(show);
+}
+
 void LCEditorUI::showUI(bool show) {
     EditorUI::showUI(show);
     float scale = m_positionSlider->getScale();
-    bool isLowScale = scale <= 0.925;
 
     auto module = LiveColors::get();
 

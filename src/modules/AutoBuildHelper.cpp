@@ -3,7 +3,7 @@
 void AutoBuildHelper::onEditor() {
     if (getSetting<bool, "show-on-pause">()) return;
 
-    auto menu = typeinfo_cast<CCMenu*>(m_editorUI->getChildByID("toolbar-toggles-menu"));
+    auto menu = m_editorUI->getChildByID("toolbar-toggles-menu");
     if (!menu) return;
 
     auto autoBuildHelperSpr = CCSprite::create("build_helper.png"_spr);
@@ -58,12 +58,6 @@ void AutoBuildHelper::onEditorPauseLayer(EditorPauseLayer* editorPauseLayer) {
 void AutoBuildHelper::onToggleAutoBuildHelper(CCObject* sender) {
     auto toggler = static_cast<CCMenuItemToggler*>(sender);
     m_autoBuildHelperEnabled = toggler->isOn();
-    // editor sounds compat
-    if (!getSetting<bool, "show-on-pause">()) {
-        auto editor = EditorUI::get();
-        sender->setTag(editor->m_selectedMode);
-        editor->toggleMode(sender);
-    }
 }
 
 CCArray* ABHEditorUI::pasteObjects(gd::string p0, bool p1, bool p2) {
