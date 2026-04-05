@@ -11,8 +11,8 @@ class $modify(OSEditorUI, EditorUI) {
     $registerGlobalHooks(ObjectSearch)
 
     struct Fields {
-        Ref<EditButtonBar> m_searchBar;
-        Ref<tinker::ui::SearchField> m_searchField;
+        EditButtonBar* m_searchBar;
+        tinker::ui::SearchField* m_searchField;
         std::map<unsigned int, tinker::ui::SearchField::ItemInformation> m_items;
         std::vector<tinker::ui::SearchField::ItemInformation*> m_orderedItems;
     };
