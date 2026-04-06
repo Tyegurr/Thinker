@@ -22,7 +22,8 @@ bool RotationNode::init(EditorUI* editor) {
 
 bool RotationNode::clickBegan(alpha::dispatcher::TouchEvent* touch) {
     if (touch->getLocation().y < m_editorUI->m_toolbarHeight) return false;
-
+    if (m_editorUI->m_editorLayer->m_playbackMode == PlaybackMode::Playing) return false;
+    
     if (touch->getButton() == alpha::dispatcher::MouseButton::RIGHT) {
         m_rotateDragging = true;
         m_lastPos = touch->getLocation();
