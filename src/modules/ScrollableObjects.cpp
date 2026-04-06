@@ -241,7 +241,7 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     fields->m_scrollLayer->setHorizontalScroll(true);
     fields->m_scrollLayer->setHorizontalScrollWheel(true);
     fields->m_scrollLayer->setVerticalScroll(false);
-    fields->m_scrollLayer->setTouchPriority(-520);
+    fields->m_scrollLayer->setTouchPriority(-130);
     fields->m_scrollLayer->setID("buttons-scroll-layer"_spr);
     
     fields->m_scrollLayer->setCullingMethod([this, fields](CCNode* content, const CCPoint& scroll) {
