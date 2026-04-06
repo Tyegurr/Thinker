@@ -1,3 +1,6 @@
+# 1.0.0-beta.5
+- Fix Negate Input sprite
+
 # 1.0.0-beta.4
 - Fix a crash
 - Change Single Deselect to use Keybind
