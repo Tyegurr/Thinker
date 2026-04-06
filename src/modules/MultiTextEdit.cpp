@@ -5,7 +5,7 @@ bool MTECustomizeObjectLayer::init(GameObject* object, CCArray* objects) {
 
     for (auto obj : CCArrayExt<GameObject*>(objects)) {
         if (obj->m_objectID != 914) {
-            return CustomizeObjectLayer::init(obj, objects);
+            return CustomizeObjectLayer::init(object, objects);
         }
     }
 
