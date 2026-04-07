@@ -1,6 +1,6 @@
 # 1.0.0-beta.7
 - <c-dddddd>Fix BetterEdit's edit menu buttons being invisible</c>
-
+- <c-dddddd>Clean up Object Search UI on mobile</c>
 
 # 1.0.0-beta.6
 - <c-dddddd>Fix Platformer Control Touch in Editor when Canvas Rotation is enabled</c>

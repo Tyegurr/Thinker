@@ -36,6 +36,8 @@ namespace tinker::ui {
 
         void setOrigY();
 
+        void setupTabOffset();
+
         virtual bool clickBegan(TouchEvent* touch) override;
 
         CCArray* generateItemArrayForSearch(const std::string& search);

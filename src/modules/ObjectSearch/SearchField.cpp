@@ -135,7 +135,9 @@ bool SearchField::init(OSEditorUI* editorUI) {
     m_clearButton->setSelectCallback([this] (auto sender) {
         m_lockClose = true;
         m_searchInput->focus();
+        #ifdef GEODE_IS_MOBILE
         textInputShouldOffset(m_searchInput->getInputNode(), m_yOffset);
+        #endif
     });
 
     m_clearButton->setPosition({getContentWidth() - 6 - m_clearButton->getContentWidth() / 2, getContentHeight() / 2});
@@ -197,10 +199,8 @@ void SearchField::textInputOpened(CCTextInputNode* node) {
     #ifdef GEODE_IS_MOBILE
     m_inputFocused = true;
 
-    auto tab = m_editorUI->m_fields->m_searchBar;
+    setupTabOffset();
 
-    setPositionY(m_yOffset);
-    tab->setPositionY(m_yOffset + getScaledContentHeight() + 10);
     m_lockClose = true;
     runAction(CallFuncExt::create([this] {
         m_lockClose = false;
@@ -232,19 +232,23 @@ void SearchField::textInputShouldOffset(CCTextInputNode* node, float yOffset) {
     #ifdef GEODE_IS_MOBILE
     m_yOffset = yOffset;
     runAction(CallFuncExt::create([this] {
-        setPositionY(m_yOffset);
-
-        auto tab = m_editorUI->m_fields->m_searchBar;
-        tab->setPositionY(m_yOffset + getScaledContentHeight() + 10);
-
-        m_tabBG->setContentSize(tab->getScaledContentSize() + CCSize{0, 10});
-        m_tabBG->setPosition(tab->getPosition() + CCPoint{0, tab->getScaledContentHeight() / 2});
-        tab->setZOrder(20);
-        m_tabBG->setZOrder(19);
-
-        m_tabBG->removeFromParent();
-
-        m_editorUI->addChild(m_tabBG);
+        setupTabOffset();
     }));
     #endif
+}
+
+void SearchField::setupTabOffset() {
+    setPositionY(m_yOffset);
+
+    auto tab = m_editorUI->m_fields->m_searchBar;
+    tab->setPositionY(m_yOffset + getScaledContentHeight() + 10);
+
+    m_tabBG->setContentSize(tab->getScaledContentSize() + CCSize{0, 10});
+    m_tabBG->setPosition(tab->getPosition() + CCPoint{0, tab->getScaledContentHeight() / 2});
+    tab->setZOrder(20);
+    m_tabBG->setZOrder(19);
+
+    m_tabBG->removeFromParent();
+
+    m_editorUI->addChild(m_tabBG);
 }
