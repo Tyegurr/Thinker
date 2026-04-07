@@ -27,6 +27,7 @@ namespace tinker::ui {
         void onExit() override;
 
         void textInputShouldOffset(CCTextInputNode* node, float yOffset) override;
+        void textInputClosed(CCTextInputNode* node) override;
 
         void defocus();
         void focus();
@@ -44,5 +45,7 @@ namespace tinker::ui {
         geode::TextInput* m_searchInput;
         Ref<geode::NineSlice> m_searchBG;
         geode::Button* m_clearButton;
+
+        float m_origY;
     };
 }

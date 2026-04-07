@@ -168,6 +168,12 @@ bool SearchField::clickBegan(TouchEvent* touch) {
     return true;
 }
 
+void SearchField::textInputClosed(CCTextInputNode* node) {
+    setPositionY(m_origY);
+}
+
 void SearchField::textInputShouldOffset(CCTextInputNode* node, float yOffset) {
     log::info("offset: {}", yOffset);
+    m_origY = getPositionY();
+    setPositionY(yOffset);
 }
