@@ -141,7 +141,9 @@ void DurationDragDraw::draw(DrawGridLayer* dgl, float minX, float maxX, float mi
         if (object->m_endPosition == CCPointZero || LevelEditorLayer::get()->m_drawGridLayer->m_updateTimeMarkers) {
             const CCPoint newPos = tinker::utils::duration_drag::getEndPos(object);
             object->m_endPosition = newPos;
-            queueInMainThread([object = Ref(object), newPos] { object->m_endPosition = newPos; });
+            object->runAction(CallFuncExt::create([newPos, object] {
+                object->m_endPosition = newPos;
+            }));
         }
         
         if (object->getPositionX() < 0 && !object->m_isSpawnTriggered) {
@@ -162,28 +164,16 @@ void DurationDragDraw::draw(DrawGridLayer* dgl, float minX, float maxX, float mi
     }
 }
 
-DurationDrag::DurationDrag() {
-	auto& api = DrawGridAPI::get();
-    auto nodeRes = api.getNode<DurationDragDraw>();
-    if (nodeRes) {
-        auto node = nodeRes.unwrap();
-        node.setEnabled(true);
-    }
-}
-
-DurationDrag::~DurationDrag() {
-	auto& api = DrawGridAPI::get();
-    auto nodeRes = api.getNode<DurationDragDraw>();
-    if (nodeRes) {
-        auto node = nodeRes.unwrap();
-        node.setEnabled(false);
-    }
-}
-
 $on_mod(Loaded) {
 	auto& api = DrawGridAPI::get();
     
-	api.addDraw<DurationDragDraw>("duration-drag");
+	auto& node = api.addDraw<DurationDragDraw>("duration-drag");
+
+    listenForSettingChanges<bool>("DurationDrag-enabled", [&node] (bool val) {
+        node.setEnabled(val);
+    });
+
+    node.setEnabled(DurationDrag::isEnabled());
 
 	if (auto durationLineRes = api.getNode<DurationLines>()) {
 		auto& durationLines = durationLineRes.unwrap();

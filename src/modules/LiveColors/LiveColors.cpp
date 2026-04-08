@@ -1,6 +1,7 @@
 #include "LiveColors.hpp"
 #include "../../Utils.hpp"
 #include "ColorVisualButton.hpp"
+#include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 
 using namespace tinker::ui;
 
@@ -61,7 +62,9 @@ void LCEditorUI::showUI(bool show) {
 
     module->m_colorsMenu->setPositionY(show ? m_toolbarHeight + 20 * scale : 5);
     module->m_colorsMenu->setEnabled(show);
-    module->m_colorsMenu->setVisible(m_editorLayer->m_playbackMode == PlaybackMode::Playing || show);
+    if (alpha::editor_tabs::getCurrentTab().unwrapOrDefault() != "all-objects"_spr) {
+        module->m_colorsMenu->setVisible(m_editorLayer->m_playbackMode == PlaybackMode::Playing || show);
+    }
 }
 
 void LCEditorUI::checkColors(float dt) {

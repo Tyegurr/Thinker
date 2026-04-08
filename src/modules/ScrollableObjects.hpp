@@ -31,6 +31,7 @@ class $modify(SOEditButtonBar, EditButtonBar) {
         Ref<CCMenu> m_extrasMenu;
         Ref<CCNode> m_extrasMenuContainer;
         Ref<BoomScrollLayer> m_dummyScrollLayer;
+        std::vector<Ref<CCNode>> m_items;
 
         CCSprite* m_separator;
         ColumnLayout* m_extrasLayout;

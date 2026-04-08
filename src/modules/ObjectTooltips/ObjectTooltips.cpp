@@ -44,6 +44,8 @@ bool TooltipHover::init() {
     m_tooltipBG->setVisible(false);
     m_tooltipBG->setOpacity(220);
     m_tooltipBG->setID("tooltip-background"_spr);
+    m_tooltipBG->setScale(ObjectTooltips::getSetting<float, "scale">());
+    m_tooltipBG->setCascadeOpacityEnabled(true);
 
     addChild(m_tooltipBG);
 
@@ -72,6 +74,8 @@ void TooltipHover::resetTooltip() {
     m_activeItem = nullptr;
 }
 
+#ifdef GEODE_IS_DESKTOP
+
 bool TooltipHover::clickBegan(TouchEvent* touch) {
     if (m_activeItem) {
         m_tooltipBG->setVisible(false);
@@ -96,8 +100,14 @@ void TooltipHover::clickEnded(TouchEvent* touch) {
 bool TooltipHover::mouseEntered(TouchEvent* touch) {
     return true;
 }
+#endif
 
-void TooltipHover::mouseMoved(TouchEvent* touch) {
+#ifdef GEODE_IS_MOBILE
+void TooltipHover::showTooltipWithTouch(TouchEvent* touch) 
+#else
+void TooltipHover::mouseMoved(TouchEvent* touch) 
+#endif
+{
     if (LevelEditorLayer::get()->getChildByType<EditorPauseLayer>(0)) return;
 
     auto origItem = m_activeItem;
@@ -150,6 +160,19 @@ void TooltipHover::mouseMoved(TouchEvent* touch) {
 
     if (m_activeItem) {
         setButtonOpacity(m_activeItem, 172);
+        
+        #ifdef GEODE_IS_MOBILE
+        unschedule(schedule_selector(TooltipHover::scheduleHide));
+        m_tooltipBG->stopAllActions();
+        m_tooltipBG->setOpacity(220);
+
+        auto bb = m_activeItem->boundingBox();
+
+        auto positionWorld = m_activeItem->getParent()->convertToWorldSpace({m_activeItem->getPositionX(), bb.getMaxY() + 2});
+        auto positionHere = convertToNodeSpace(positionWorld);
+
+        m_tooltipBG->setPosition(positionHere);
+        #endif
     }
 
     if (m_activeItem && m_activeItem != origItem) {
@@ -159,6 +182,27 @@ void TooltipHover::mouseMoved(TouchEvent* touch) {
         hideTooltip(origItem);
     }
 }
+
+#ifdef GEODE_IS_MOBILE
+bool TooltipHover::clickBegan(TouchEvent* touch) {
+    showTooltipWithTouch(touch);
+    m_clicking = true;
+    return true;
+}
+
+void TooltipHover::clickEnded(TouchEvent* touch) {
+    m_clicking = false;
+    scheduleOnce(schedule_selector(TooltipHover::scheduleHide), 2);
+}
+
+void TooltipHover::clickMoved(TouchEvent* touch) {
+    showTooltipWithTouch(touch);
+}
+
+void TooltipHover::scheduleHide(float dt) {
+    hideTooltip(m_activeItem);
+}
+#endif
 
 void TooltipHover::setButtonOpacity(CreateMenuItem* item, GLubyte opacity) {
     auto buttonSprite = item->getChildByType<ButtonSprite>(0);
@@ -196,15 +240,28 @@ void TooltipHover::showTooltip(CreateMenuItem* item) {
         m_tooltipIDLabel->setPosition({2.5f, 2.5f});
     }
 
+    #ifdef GEODE_IS_DESKTOP
     if (!m_clicking) {
         m_tooltipBG->setVisible(true);
     }
+    #else
+    m_tooltipBG->stopAllActions();
+    m_tooltipBG->setOpacity(220);
+    m_tooltipBG->setVisible(true);
+    #endif
 }
 
 void TooltipHover::hideTooltip(CreateMenuItem* item) {
+    #ifdef GEODE_IS_DESKTOP
     if (!m_clicking) {
         m_tooltipBG->setVisible(false);
     }
+    #else
+    m_tooltipBG->runAction(CCSequence::createWithTwoActions(CCFadeOut::create(0.2f), CallFuncExt::create([this] {
+        m_tooltipBG->setVisible(false);
+        m_activeItem = nullptr;
+    })));
+    #endif
 }
 
 void TooltipHover::onEnter() {

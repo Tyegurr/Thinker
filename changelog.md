@@ -1,3 +1,14 @@
+# 1.0.0-beta.10
+- <c-dddddd>Fix Duration Dragging lines showing when disabled</c>
+- <c-dddddd>Fix Live Colors menu showing under search if you pause and unpause</c>
+- <c-dddddd>Always force BetterEdit move tab reload to fix invisible buttons</c>
+- <c-dddddd>Clean up some queued methods to hopefully fix a crash</c>
+- <c-dddddd>Fix a typo in the settings</c>
+- <c-dddddd>Fix link controls position and sizing on mobile</c>
+- <c-dddddd>Add Object Tooltip Scale setting</c>
+- <c-dddddd>Make Tooltips visible on mobile</c>
+- <c-dddddd>Fix clicking on objects not bringing you to the right tab in the build menu</c>
+
 # 1.0.0-beta.9
 - <c-dddddd>Fix Auto "Build Helper" not working</c>
 - <c-dddddd>Save Auto "Build Helper" toggle state</c>

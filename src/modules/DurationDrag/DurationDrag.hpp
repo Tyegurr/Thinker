@@ -11,9 +11,6 @@
 class $editorModule(DurationDrag) {
     tinker::ui::DurationControl* m_durationControl = nullptr;
 
-    DurationDrag();
-    ~DurationDrag();
-
     void onEditor() override;
 	void updateObjects();
 };

@@ -191,9 +191,10 @@ void DurationThumb::positionPulseSlider() {
     }
 
     if (m_object->m_isDirty) {
-        queueInMainThread([self = Ref(this)] {
-            self->m_object->m_endPosition = tinker::utils::duration_drag::getEndPos(self->m_object);
-        });
+        runAction(CallFuncExt::create([this] {
+            if (!m_object) return;
+            m_object->m_endPosition = tinker::utils::duration_drag::getEndPos(m_object);
+        }));
     }
 
     CCPoint start = m_object->getPosition();
@@ -280,13 +281,13 @@ void DurationThumb::update(float dt) {
         stopAction(m_fadeInAction);
         stopAction(m_fadeOutAction);
 
-        queueInMainThread([self = Ref(this), fadeTo = overlap ? 127 : 255] {
-            self->runAction(
+        runAction(CallFuncExt::create([this, fadeTo = overlap ? 127 : 255] {
+            runAction(
                 fadeTo == 127
-                    ? (self->m_fadeOutAction = CCFadeTo::create(0.2f, fadeTo))
-                    : (self->m_fadeInAction  = CCFadeTo::create(0.2f, fadeTo))
+                    ? (m_fadeOutAction = CCFadeTo::create(0.2f, fadeTo))
+                    : (m_fadeInAction  = CCFadeTo::create(0.2f, fadeTo))
             );
-        });
+        }));
 
         m_overlapping = overlap;
     }

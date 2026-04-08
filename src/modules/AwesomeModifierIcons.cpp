@@ -29,18 +29,18 @@ void AMIEffectGameObject::customSetup() {
     spr->setScale(0.9f);
     addChildAtPosition(spr, Anchor::Center);
 
-    queueInMainThread([module, self = Ref(this)] {
-        auto label = self->getChildByType<CCLabelBMFont>(0);
+    runAction(CallFuncExt::create([module, this] {
+        auto label = getChildByType<CCLabelBMFont>(0);
         if (!label) return;
         if (module->getSetting<bool, "show-letter">()) {
-            label->setPosition({2, self->getContentHeight()});
+            label->setPosition({2, getContentHeight()});
             label->setScale(0.3f);
             label->setAnchorPoint({0, 1});
         }
         else {
             label->setVisible(false);
         }
-    });
+    }));
 }
 
 bool AMIEditorUI::init(LevelEditorLayer* editorLayer) {

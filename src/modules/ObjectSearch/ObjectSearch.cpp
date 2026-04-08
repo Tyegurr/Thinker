@@ -100,6 +100,7 @@ bool OSEditorUI::init(LevelEditorLayer* editorLayer) {
                 newCmi->m_objectID = cmi->m_objectID;
                 newCmi->m_pageIndex = cmi->m_pageIndex;
                 newCmi->m_tabIndex = cmi->m_tabIndex;
+                newCmi->setUserFlag("search-item"_spr);
 
                 if (tinker::utils::getMod<"raydeeux.gameobjectidstacksize">()) {
                     ObjectIDDisplay::AddObjectIDLabelEvent().send(newCmi);

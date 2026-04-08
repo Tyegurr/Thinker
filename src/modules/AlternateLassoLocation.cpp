@@ -4,10 +4,9 @@ void AlternateLassoLocation::onEditor() {
     auto togglesMenu = m_editorUI->getChildByID("toolbar-toggles-menu");
     if (!togglesMenu) return;
 
-    auto buttonsMenu = m_editorUI->getChildByID("editor-buttons-menu");
-    if (!buttonsMenu) return;
-
-    m_editorUI->runAction(CallFuncExt::create([this, togglesMenu, buttonsMenu] {
+    m_editorUI->runAction(CallFuncExt::create([this] {   
+        auto buttonsMenu = m_editorUI->getChildByID("editor-buttons-menu");
+        if (!buttonsMenu) return;
 
         auto lassoMenu = buttonsMenu->getChildByID("undefined0.lasso-select/lasso-button-menu");
         if (!lassoMenu) return;

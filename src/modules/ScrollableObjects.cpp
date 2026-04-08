@@ -26,6 +26,21 @@ bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
         scrollEbb->cull(scrollEbbFields, scrollEbbFields->m_scrollLayer->getScrollPoint().x);
     });
 
+    alpha::editor_tabs::addModeSwitchCallback([] (auto mode) {
+        auto nodeRes = alpha::editor_tabs::nodeForTab(alpha::editor_tabs::getCurrentTab().unwrapOrDefault());
+        if (!nodeRes) return;
+        
+        auto node = nodeRes.unwrap();
+        auto ebb = typeinfo_cast<EditButtonBar*>(node.data());
+
+        if (!ebb) return;
+        auto scrollEbb = static_cast<SOEditButtonBar*>(ebb);
+        auto scrollEbbFields = scrollEbb->m_fields.self();
+
+        if (!scrollEbbFields->m_scrollLayer) return;
+        scrollEbb->cull(scrollEbbFields, scrollEbbFields->m_scrollLayer->getScrollPoint().x);
+    });
+
     runAction(CallFuncExt::create([this] {
 
         auto cols = GameManager::get()->getIntGameVariable(GameVar::EditorButtonsPerRow);
@@ -67,6 +82,7 @@ void SOEditorUI::updateCreateMenu(bool selectTab) {
 
         for (auto item : m_createButtonArray->asExt<CCNode>()) {
             if (auto createMenuItem = typeinfo_cast<CreateMenuItem*>(item)) {
+                if (createMenuItem->getUserFlag("search-item"_spr)) continue;
                 if (createMenuItem->m_objectID == m_selectedObjectIndex) {
                     cmi = createMenuItem;
                     break;
@@ -115,6 +131,7 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     }
 
     m_buttonArray = objects;
+    fields->m_items.clear();
 
     float currentX = 0;
 
@@ -207,6 +224,11 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
         object->removeFromParentAndCleanup(false);
         object->setScale(1);
         object->setVisible(true);
+
+        if (auto cmi = typeinfo_cast<CreateMenuItem*>(object)) {
+            cmi->m_tabIndex = m_tabIndex;
+        }
+        
         if (auto item = typeinfo_cast<CCMenuItemSpriteExtra*>(object)) {
             item->m_baseScale = 1.f;
         }
@@ -223,6 +245,7 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
         }
 
         fields->m_objectsMenu->addChild(object);
+        fields->m_items.push_back(object);
 
         rowIdx++;
         if (rowIdx == rows) {
@@ -355,7 +378,7 @@ void SOEditButtonBar::cull(SOEditButtonBar::Fields* fields, float x) {
     visibleNodes.clear();
 
     if (tinker::utils::getMod<"hjfod.betteredit">() && alpha::editor_tabs::getCurrentTab().unwrapOrDefault() == "edit") {
-        for (auto child : fields->m_objectsMenu->getChildrenExt()) {
+        for (auto child : fields->m_items) {
             child->setVisible(true);
             visibleNodes.push_back(child);
         }
