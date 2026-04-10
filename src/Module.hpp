@@ -81,7 +81,9 @@ public:
         static auto setting = Mod::get()->getSetting(enabledKey.data());
         if (!setting) return false;
         static bool settingEnabled = setting->shouldEnable();
-        static auto listener = listenForAllSettingChanges([] (std::string_view key, std::shared_ptr<SettingV3> setting) {
+        static auto listener = listenForAllSettingChanges([] (std::string_view key, std::shared_ptr<SettingV3> settingA) {
+            static auto setting = Mod::get()->getSetting(enabledKey.data());
+            if (!setting) return;
             settingEnabled = setting->shouldEnable();
         });
         return settingEnabled && getSetting<bool, "enabled">();
