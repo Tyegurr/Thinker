@@ -8,6 +8,24 @@ body:
       value: |
         ## Report an issue with Touch
 
+  - type: input
+    id: tinker-version
+    attributes: 
+      label: Tinker version
+      description: The version of Tinker you are currently using.
+      placeholder: The version number (such as v1.0.0-beta.14)
+    validations:
+      required: true
+
+  - type: input
+    id: geode-version
+    attributes: 
+      label: Geode version
+      description: The version of Geode you are currently using.
+      placeholder: The version number (such as v5.5.3)
+    validations:
+      required: true
+
   - type: textarea
     id: issue-description
     attributes:
