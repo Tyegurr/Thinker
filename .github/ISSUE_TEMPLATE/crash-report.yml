@@ -32,8 +32,8 @@ body:
       label: Crash Type
       description: The type of crash that occurred
       options:
-      - label: Random
-      - label: Consistent
+      - "Random"
+      - "Consistent"
     validations:
       required: true
 
@@ -43,8 +43,8 @@ body:
       label: Crash Replication
       description: Can you replicate the steps to cause this crash?
       options:
-      - label: Yes
-      - label: No
+      - "Yes"
+      - "No"
     validations:
       required: true
 
