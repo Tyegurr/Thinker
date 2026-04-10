@@ -1,0 +1,69 @@
+name: Bug Report
+description: Report any bugs with Tinker. This is not for crashes or touch related issues.
+labels: [bug]
+assignees: Alphalaneous
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a bug with Tinker
+        > Please do not use this to report crashes or touch related issues. Use the other templates for those.
+  
+  - type: checkboxes
+    id: verification
+    attributes:
+      options:
+      - label: I verify that this bug report isn't a crash or related to touch related issues.
+    validations:
+      required: true
+
+  - type: input
+    id: tinker-version
+    attributes: 
+      label: Tinker version
+      description: The version of Tinker you are currently using.
+      placeholder: The version number (such as v1.0.0-beta.14)
+    validations:
+      required: true
+
+  - type: input
+    id: geode-version
+    attributes: 
+      label: Geode version
+      description: The version of Geode you are currently using.
+      placeholder: The version number (such as v5.5.3)
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: Explain that the bug is. Such as something is not working as intended, something looks wrong, mod conflicts, etc.
+      placeholder: Bug description
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Extra Media
+      description: If you have any images, video, or other attachments for the bug report, please put them here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+      - label: Windows
+      - label: Mac (Intel)
+      - label: Mac (Arm)
+      - label: Android (32-bit)
+      - label: Android (64-bit)
+      - label: iOS
+      - label: iOS (Jitless)
+      - label: Linux
+    validations:
+      required: true

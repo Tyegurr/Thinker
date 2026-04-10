@@ -1,0 +1,27 @@
+name: Touch Issue
+description: Report an issue with Touch with Tinker
+labels: [touch]
+assignees: Alphalaneous
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Report an issue with Touch
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Information
+      description: Where does touch break? What did you do before this happened? Please provide steps if you can replicate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: mod-list
+    attributes:
+      label: Mod List
+      description: |
+        What mods do you have installed?
+        You can copy the mod list in Geode Settings by clicking "Copy Mods"
+    validations:
+      required: true

@@ -1,0 +1,34 @@
+name: Suggestion
+description: Suggest a new feature to be added Tinker
+labels: [suggestion]
+assignees: Alphalaneous
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Suggest a Feature
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      options:
+      - label: I verify that this suggestion isn't already a feature in Tinker and that I have looked over the settings and mod description.
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature description
+      description: What do you wish to see added to Tinker? What should it do? Be descriptive.
+      placeholder: Feature description
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Media
+      description: Please provide any concept art or similar you have for the suggestion if applicable.
+    validations:
+      required: false

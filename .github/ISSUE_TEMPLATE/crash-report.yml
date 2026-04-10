@@ -1,0 +1,111 @@
+name: Crash Report
+description: Report a crash
+labels: [crash]
+assignees: Alphalaneous
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Crash
+
+  - type: input
+    id: tinker-version
+    attributes: 
+      label: Tinker version
+      description: The version of Tinker you are currently using.
+      placeholder: The version number (such as v1.0.0-beta.14)
+    validations:
+      required: true
+
+  - type: input
+    id: geode-version
+    attributes: 
+      label: Geode version
+      description: The version of Geode you are currently using.
+      placeholder: The version number (such as v5.5.3)
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Crash Type
+      description: The type of crash that occured
+      options:
+      - label: Random
+      - label: Consistent
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Crash Replication
+      description: Can you replicate the steps to cause this crash?
+      options:
+      - label: Yes
+      - label: No
+    validations:
+      required: true
+
+  - type: textarea
+    id: crashlog-description
+    attributes:
+      label: Description
+      description: What caused the crash? What steps does it take to replicate it? What were you doing before it happened?
+      placeholder: Crash description
+    validations:
+      required: true
+
+  - type: textarea
+    id: crashlog
+    attributes:
+      label: Crashlog
+      description: |
+        Please include the latest crashlog from `.../Geometry Dash/geode/crashlogs`.
+        You can access these crashlogs from the launcher settings on iOS and Android
+        Make sure that the mod list is in your crashlog. Do not submit incomplete crash logs or images of crash logs.
+      placeholder: |
+        2026-04-10T14:06:41.0723206+0000
+        Whoopsies! An unhandled exception has occurred.
+
+        Please share the whole crash log when asking for help.
+
+        == Geode Information ==
+        Loader Version: v5.5.3
+        Platform: Windows x64 10.0.19045
+        Loader Commit: 3014a0e
+        Bindings Commit: a3c4d930
+        Installed mods: 353
+        Failed to load: 32
+
+        == Exception Information ==
+        Faulty Module: D:\SteamLibrary\steamapps\common\Geometry Dash\geode\unzipped\alphalaneous.tinker\alphalaneous.tinker.dll
+        Faulty Mod: alphalaneous.tinker
+        Exception Code: c0000005 (EXCEPTION_ACCESS_VIOLATION)
+        Exception Flags: 0
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Extra Media
+      description: If you have any images, video, or other attachments for the crash report, please put them here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+      - label: Windows
+      - label: Mac (Intel)
+      - label: Mac (Arm)
+      - label: Android (32-bit)
+      - label: Android (64-bit)
+      - label: iOS
+      - label: iOS (Jitless)
+      - label: Linux
+    validations:
+      required: true
