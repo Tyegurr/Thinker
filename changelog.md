@@ -1,3 +1,6 @@
+# 1.0.0-beta.12
+- <c-dddddd>Hotfix for BetterEdit Edit Menu breaking
+
 # 1.0.0-beta.11
 - <c-dddddd>Fix some broken sprites when not using high quality textures</c>
 - <c-dddddd>Tooltips are now higher on mobile</c>

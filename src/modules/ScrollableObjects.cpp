@@ -1,5 +1,6 @@
 #include "ScrollableObjects.hpp"
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
+#include <alphalaneous.alphas_geode_utils/include/ObjectModify.hpp>
 
 bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
     if (!EditorUI::init(editorLayer)) return false;
@@ -76,6 +77,20 @@ void SOEditorUI::scrollWheel(float y, float x) {
 
 void SOEditorUI::updateCreateMenu(bool selectTab) {
     EditorUI::updateCreateMenu(selectTab);
+    auto cur = alpha::editor_tabs::getCurrentTab().unwrapOrDefault();
+
+    if (tinker::utils::getMod<"hjfod.betteredit">() && cur == "edit" && alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == alpha::editor_tabs::EDIT) {
+        auto nodeRes = alpha::editor_tabs::nodeForTab(cur);
+        if (!nodeRes) return;
+
+        auto node = static_cast<SOEditButtonBar*>(static_cast<EditButtonBar*>(nodeRes.unwrap().data()));
+        auto fields = node->m_fields.self();
+        
+        for (auto child : fields->m_items) {
+            child->setVisible(true);
+        }
+    }
+
     if (selectTab) {
         CreateMenuItem* cmi = nullptr;
 
@@ -130,7 +145,9 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     }
 
     m_buttonArray = objects;
-    fields->m_items.clear();
+    if (objects->count() > 0) {
+        fields->m_items.clear();
+    }
 
     float currentX = 0;
 
@@ -376,7 +393,7 @@ void SOEditButtonBar::cull(SOEditButtonBar::Fields* fields, float x) {
     auto& visibleNodes = fields->m_visibleNodes;
     visibleNodes.clear();
 
-    if (tinker::utils::getMod<"hjfod.betteredit">() && alpha::editor_tabs::getCurrentTab().unwrapOrDefault() == "edit") {
+    if (tinker::utils::getMod<"hjfod.betteredit">() && alpha::editor_tabs::getCurrentTab().unwrapOrDefault() == "edit" && alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == alpha::editor_tabs::EDIT) {
         for (auto child : fields->m_items) {
             child->setVisible(true);
             visibleNodes.push_back(child);
@@ -534,3 +551,36 @@ void SOEditorOptionsLayer::onButtonRows(cocos2d::CCObject* sender) {
     m_buttonRows = std::clamp(rows, 1, 16);
     m_buttonRowsLabel->setString(numToString(m_buttonRows).c_str());
 }
+
+class $nodeModify(SOMoveGroup, MoveGroup) {
+
+    void modify() {
+        if (!ScrollableObjects::isEnabled()) return;
+        runAction(CallFuncExt::create([this] {
+            for (auto node : getChildrenExt()) {
+                node->setVisible(true);
+            }
+        }));
+    }
+};
+
+// betteredit is a meanyhead
+class $nodeModify(SOCustomEditMenu, CustomEditMenu) {
+
+    void modify() {
+        if (!ScrollableObjects::isEnabled()) return;
+        schedule(schedule_selector(SOCustomEditMenu::ensureVisible));
+    }
+
+    void ensureVisible(float dt) {        
+        for (auto node : getChildrenExt()) {
+            if (node->getChildrenCount() <= 2 || !typeinfo_cast<CCMenu*>(node)) continue;
+
+            for (auto btn : node->getChildrenExt()) {
+                btn->setVisible(true);
+            }
+            node->updateLayout();
+            unschedule(schedule_selector(SOCustomEditMenu::ensureVisible));
+        }
+    }
+};

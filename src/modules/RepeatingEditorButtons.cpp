@@ -129,7 +129,7 @@ void REBEditButtonBar::loadFromItems(CCArray* p0, int p1, int p2, bool p3) {
     }));
 }
 
-class $nodeModify(MyMoveGroup, MoveGroup) {
+class $nodeModify(REBMoveGroup, MoveGroup) {
 
     void modify() {
         if (!RepeatingEditorButtons::isEnabled()) return;
