@@ -26,25 +26,25 @@ body:
     validations:
       required: true
 
-  - type: checkboxes
+  - type: dropdown
     id: crash-type
     attributes:
       label: Crash Type
       description: The type of crash that occured
       options:
-      - label: Random
-      - label: Consistent
+      - Random
+      - Consistent
     validations:
       required: true
 
-  - type: checkboxes
+  - type: dropdown
     id: crash-replication
     attributes:
       label: Crash Replication
       description: Can you replicate the steps to cause this crash?
       options:
-      - label: Yes
-      - label: No
+      - Yes
+      - No
     validations:
       required: true
 
