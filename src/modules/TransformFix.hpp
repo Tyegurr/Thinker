@@ -4,7 +4,9 @@
 #include <Geode/modify/GJTransformControl.hpp>
 #include <Geode/modify/GJScaleControl.hpp>
 
-class $globalModule(TransformFix) {};
+class $globalModule(TransformFix) {
+    bool onToggled(bool state) override;
+};
 
 class $modify(TFGJTransformControl, GJTransformControl) {
     $registerGlobalHooks(TransformFix);
@@ -14,8 +16,9 @@ class $modify(TFGJTransformControl, GJTransformControl) {
         bool m_touchInMenu = false;
     };
 
-    bool init();
     void scaleButtons(float scale);
+
+    CCMenu* getMenu();
 
     bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
     void ccTouchMoved(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
@@ -31,7 +34,8 @@ class $modify(TFGJScaleControl, GJScaleControl) {
         bool m_touchInMenu = false;
     };
 
-    bool init();
+    CCMenu* getMenu();
+
     bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
     void ccTouchMoved(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);
     void ccTouchEnded(cocos2d::CCTouch* touch, cocos2d::CCEvent* event);

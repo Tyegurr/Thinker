@@ -1,5 +1,13 @@
 #include "hIDe.hpp"
 
+bool hIDe::onToggled(bool state) {
+    return true;
+}
+
+bool hIDe::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    return true;
+}
+
 bool HDEditLevelLayer::init(GJGameLevel* p0) {
     if (!EditLevelLayer::init(p0)) return false;
     

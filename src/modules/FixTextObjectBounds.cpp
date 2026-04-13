@@ -1,6 +1,10 @@
 #include "FixTextObjectBounds.hpp"
 #include "ReferenceImage.hpp"
 
+bool FixTextObjectBounds::onToggled(bool state) {
+    return true;
+}
+
 void FTOBTextGameObject::fixBounds() {
     if (ReferenceImage::isEnabled()) {
         auto ref = static_cast<RITextGameObject*>(static_cast<TextGameObject*>(this));

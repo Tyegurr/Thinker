@@ -10,10 +10,9 @@ std::unordered_map<int, std::string> AwesomeModifierIcons::s_textureMap = {
 
 void AMIEffectGameObject::customSetup() {
     EffectGameObject::customSetup();
-    auto module = AwesomeModifierIcons::get();
     if (!AwesomeModifierIcons::s_textureMap.contains(m_objectID)) return;
 
-    if (!module->getSetting<bool, "solid-border">()) {
+    if (!AwesomeModifierIcons::get()->getSetting<bool, "solid-border">()) {
         if (auto newSpr = CCSprite::createWithSpriteFrameName("edit_eCollisionBlock01_001.png")) {
             setTexture(newSpr->getTexture());
             setTextureRect(newSpr->getTextureRect());
@@ -28,19 +27,22 @@ void AMIEffectGameObject::customSetup() {
 
     spr->setScale(0.9f);
     addChildAtPosition(spr, Anchor::Center);
+    updateLetters();
+}
 
-    runAction(CallFuncExt::create([module, this] {
-        auto label = getChildByType<CCLabelBMFont>(0);
-        if (!label) return;
-        if (module->getSetting<bool, "show-letter">()) {
-            label->setPosition({2, getContentHeight()});
-            label->setScale(0.3f);
-            label->setAnchorPoint({0, 1});
-        }
-        else {
-            label->setVisible(false);
-        }
-    }));
+void AMIEffectGameObject::updateLetters() {
+    auto showLetter = AwesomeModifierIcons::get()->getSetting<bool, "show-letter">();
+    auto label = getChildByType<CCLabelBMFont>(0);
+    if (!label) return;
+
+    if (showLetter) {
+        label->setPosition({2, getContentHeight()});
+        label->setScale(0.3f);
+        label->setAnchorPoint({0, 1});
+    }
+    else {
+        label->setVisible(false);
+    }
 }
 
 bool AMIEditorUI::init(LevelEditorLayer* editorLayer) {
@@ -68,6 +70,14 @@ bool AMIEditorUI::init(LevelEditorLayer* editorLayer) {
 
     for (const auto& [index, item] : asp::iter::from(buttonsExt).enumerate()) {
         if (!item) continue;
+
+        if (AwesomeModifierIcons::s_textureMap.find(item->m_objectID) != AwesomeModifierIcons::s_textureMap.end()) {
+            auto buttonSprite = item->getChildByType<ButtonSprite>(0);
+            auto gameObject = static_cast<AMIEffectGameObject*>(buttonSprite->getChildByType<EffectGameObject>(0));
+            if (gameObject) {
+                gameObject->updateLetters();
+            }
+        }
 
         if (item->m_objectID == 2866) {
             fIndex = index;

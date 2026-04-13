@@ -1,16 +1,41 @@
 #include "JoystickNavigation.hpp"
 #include "NavigationControl.hpp"
+#include "../CanvasRotate/CanvasRotate.hpp"
 
 using namespace tinker::ui;
 
 bool JoystickNavigation::s_resetPosition = false;
 
-void JoystickNavigation::onEditor() {
-    auto navControl = NavigationControl::create(m_editorUI, getSetting<float, "opacity">(), getSetting<float, "scale">());
-    navControl->setID("navigation-control"_spr);
+bool JoystickNavigation::onToggled(bool state) {
+    if (state) {
+        onEditor();
+    }
+    else {
+        if (m_navigationControl) {
+            m_editorUI->m_uiItems->removeObject(m_navigationControl);
+            m_navigationControl->removeFromParent();
+        }
+    }
+    return true;
+}
 
-    m_editorUI->m_uiItems->addObject(navControl);
-    m_editorUI->addChild(navControl);
+void JoystickNavigation::updateController(bool canvasRotate) {
+    if (m_navigationControl) {
+        m_navigationControl->updateControl(canvasRotate);
+    }
+}
+
+bool JoystickNavigation::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    updateController(CanvasRotate::isEnabled());
+    return true;
+}
+
+void JoystickNavigation::onEditor() {
+    m_navigationControl = NavigationControl::create(m_editorUI);
+    m_navigationControl->setID("navigation-control"_spr);
+
+    m_editorUI->m_uiItems->addObject(m_navigationControl);
+    m_editorUI->addChild(m_navigationControl);
 
     s_resetPosition = false;
 }

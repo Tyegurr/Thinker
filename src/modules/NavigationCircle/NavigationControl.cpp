@@ -5,9 +5,9 @@
 
 using namespace tinker::ui;
 
-NavigationControl* NavigationControl::create(EditorUI* editorUI, float opacity, float scale) {
+NavigationControl* NavigationControl::create(EditorUI* editorUI) {
     auto ret = new NavigationControl();
-    if (ret->init(editorUI, opacity, scale)) {
+    if (ret->init(editorUI)) {
         ret->autorelease();
         return ret;
     }
@@ -15,22 +15,18 @@ NavigationControl* NavigationControl::create(EditorUI* editorUI, float opacity, 
     return nullptr;
 }
 
-bool NavigationControl::init(EditorUI* editorUI, float opacity, float scale) {
+bool NavigationControl::init(EditorUI* editorUI) {
     if (!CCNodeRGBA::init()) return false;
 
     m_editorUI = editorUI;
-    m_opacity = opacity;
-    m_scale = scale;
 
     setAnchorPoint({0.5f, 0.5f});
     setZOrder(500);
     setCascadeColorEnabled(true);
     setCascadeOpacityEnabled(true);
-    setScale(m_scale);
 
     m_circle = CCSprite::create("joystick-circle.png"_spr);
     m_circle->setScale(1.0f);
-    m_circle->setOpacity(CIRCLE_OPACITY * m_opacity);
 
     setContentSize(m_circle->getContentSize());
     m_circle->setPosition(getContentSize()/2);
@@ -39,35 +35,32 @@ bool NavigationControl::init(EditorUI* editorUI, float opacity, float scale) {
 
     m_joystick = CCSprite::create("joystick-circle-inside.png"_spr);
     m_joystick->setPosition(m_circle->getContentSize()/2);
-    m_joystick->setOpacity(CIRCLE_OPACITY * m_opacity);
 
     m_circle->addChild(m_joystick);
 
-    if (CanvasRotate::isEnabled()) {
-        m_rotateGrabber = CCSprite::create("joystick-rotation-handle.png"_spr);
-        m_rotateGrabber->setScale(1.0f);
-        m_rotateGrabber->setPosition(m_circle->getContentSize() / 2);
-        m_rotateGrabber->setOpacity(GRABBER_OPACITY * m_opacity);
+    m_rotateGrabber = CCSprite::create("joystick-rotation-handle.png"_spr);
+    m_rotateGrabber->setScale(1.0f);
+    m_rotateGrabber->setPosition(m_circle->getContentSize() / 2);
 
-        m_rotationContainer = CCNode::create();
-        m_rotationContainer->setAnchorPoint({0.5f, 0.5f});
-        m_rotationContainer->setContentSize(m_rotateGrabber->getContentSize());
-        m_rotationContainer->setPosition(getContentSize() / 2);
+    m_rotationContainer = CCNode::create();
+    m_rotationContainer->setAnchorPoint({0.5f, 0.5f});
+    m_rotationContainer->setContentSize(m_rotateGrabber->getContentSize());
+    m_rotationContainer->setPosition(getContentSize() / 2);
 
-        m_rotationHandle = CCLayerColor::create({255, 0, 0, 0});
-        m_rotationHandle->ignoreAnchorPointForPosition(false);
-        m_rotationHandle->setAnchorPoint({0.f, 0.5f});
-        m_rotationHandle->setContentSize({15, m_rotateGrabber->getContentHeight() / 2});
-        m_rotationHandle->setPosition({getContentWidth() + 10, m_rotationContainer->getContentHeight() / 2});
+    m_rotationHandle = CCLayerColor::create({255, 0, 0, 0});
+    m_rotationHandle->ignoreAnchorPointForPosition(false);
+    m_rotationHandle->setAnchorPoint({0.f, 0.5f});
+    m_rotationHandle->setContentSize({15, m_rotateGrabber->getContentHeight() / 2});
+    m_rotationHandle->setPosition({getContentWidth() + 10, m_rotationContainer->getContentHeight() / 2});
 
-        addChild(m_rotationContainer);
+    addChild(m_rotationContainer);
 
-        m_rotationContainer->addChild(m_rotationHandle);
+    m_rotationContainer->addChild(m_rotationHandle);
 
-        m_circle->addChild(m_rotateGrabber);
-    }
+    m_circle->addChild(m_rotateGrabber);
 
     scheduleUpdate();
+    updateControl(CanvasRotate::isEnabled());
 
     if (JoystickNavigation::s_resetPosition) {
         Mod::get()->setSavedValue("nav-joystick-pos-x", 80 + getScaledContentWidth() / 2);
@@ -85,6 +78,22 @@ bool NavigationControl::init(EditorUI* editorUI, float opacity, float scale) {
     setPosition({posX, posY});
 
     return true;
+}
+
+void NavigationControl::updateControl(bool canvasRotate) {
+    m_opacity = JoystickNavigation::getSetting<float, "opacity">();
+    m_scale = JoystickNavigation::getSetting<float, "scale">();
+
+    m_circle->stopAction(m_activeFade);
+    stopAction(m_activeScale);
+
+    setScale(m_scale);
+
+    m_circle->setOpacity(CIRCLE_OPACITY * m_opacity);
+    m_joystick->setOpacity(CIRCLE_OPACITY * m_opacity);
+
+    m_rotateGrabber->setOpacity(GRABBER_OPACITY * m_opacity);
+    m_rotateGrabber->setVisible(canvasRotate);
 }
 
 void NavigationControl::update(float dt) {
@@ -198,7 +207,7 @@ bool NavigationControl::clickBegan(TouchEvent* touch) {
 
         return true;
     }
-    if (m_rotationHandle && alpha::utils::isPointInsideNode(m_rotationHandle, touch->getLocation())) {
+    if (m_rotationHandle && m_rotationHandle->isVisible() && alpha::utils::isPointInsideNode(m_rotationHandle, touch->getLocation())) {
         m_touchActive = true;
         m_holdingRotationHandle = true;
         m_rotateGrabber->setOpacity(GRABBER_OPACITY * CLICK_MULTIPLIER * m_opacity);

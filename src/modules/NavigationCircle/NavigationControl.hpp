@@ -9,9 +9,11 @@ using namespace alpha::prelude;
 namespace tinker::ui {
     class NavigationControl : public CCNodeRGBA, public TouchDelegate {
     public:
-        static NavigationControl* create(EditorUI* editorUI, float opacity, float scale);
+        static NavigationControl* create(EditorUI* editorUI);
 
-        bool init(EditorUI* editorUI, float opacity, float scale);
+        bool init(EditorUI* editorUI);
+
+        void updateControl(bool canvasRotate);
 
         void onEnter() override;
         void onExit() override;

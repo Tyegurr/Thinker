@@ -1,6 +1,17 @@
 #include "RepeatingEditorButtons.hpp"
 #include <alphalaneous.alphas_geode_utils/include/ObjectModify.hpp>
 
+bool RepeatingEditorButtons::onToggled(bool state) {
+    if (state) {
+        onEditor();
+    }
+    return true;
+}
+
+bool RepeatingEditorButtons::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    return true;
+}
+
 void REBCCMenuItemSpriteExtra::setRepeatable(bool repeatable) {
     auto fields = m_fields.self();
     fields->m_repeatable = repeatable;
@@ -133,7 +144,6 @@ void REBEditButtonBar::loadFromItems(CCArray* p0, int p1, int p2, bool p3) {
 class $nodeModify(REBMoveGroup, MoveGroup) {
 
     void modify() {
-        if (!RepeatingEditorButtons::isEnabled()) return;
         for (auto node : getChildrenExt()) {
             if (auto btn = typeinfo_cast<CCMenuItemSpriteExtra*>(node)) {
                 static_cast<REBCCMenuItemSpriteExtra*>(btn)->setRepeatable(true);

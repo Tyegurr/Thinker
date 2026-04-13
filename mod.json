@@ -1,5 +1,5 @@
 {
-	"geode": "5.5.3",
+	"geode": "5.6.0",
 	"gd": {
 		"win": "2.2081",
 		"android": "2.2081",
@@ -8,7 +8,7 @@
 	},
 	"id": "alphalaneous.tinker",
 	"name": "Tinker",
-	"version": "v1.0.0-beta.14",
+	"version": "v1.0.0-beta.15",
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
@@ -18,7 +18,7 @@
 		"alphalaneous.alphas-ui-pack": "v1.1.0",
 		"alphalaneous.editortab_api": "v2.1.0",
 		"alphalaneous.level-storage-api": "v1.0.0",
-		"alk.better-touch-prio": "v1.0.15",
+		"alk.better-touch-prio": "v1.0.16",
 		"spaghettdev.named-editor-groups": {
 			"version": "v2.4.1",
             "required": false
@@ -92,13 +92,35 @@
 			"name": "Enable Reference Image",
 			"description": "A button to import reference images into a level."
 		},
-		"ScrollableObjects-enabled": {
+		"scrolling-title": {
+			"type": "title",
+			"name": "Scrolling"
+		},
+		"scrolling-description": {
+			"type": "info",
+			"description": "How scrolling and zooming with your mouse feels in the editor."
+		},
+		"smooth-scroll-enabled": {
 			"type": "bool",
 			"default": true,
-			"name": "Enable Scrollable Tabs",
-			"description": "Scroll through editor tabs instead of navigating per page.",
-			"enable-if": "!loaded:razoom.object_groups",
-			"enable-if-description": "This feature is not compatible with Object Groups."
+			"name": "Enable Smooth Scroll",
+			"description": "Make scrolling and zooming in the editor smoother."
+		},
+		"scroll-multiplier": {
+			"type": "float",
+			"default": 12,
+			"name": "Scroll Multiplier",
+			"description": "How fast the scrolling is.",
+			"min": 1,
+			"max": 50
+		},
+		"zoom-multiplier": {
+			"type": "float",
+			"default": 12,
+			"name": "Zoom Multiplier",
+			"description": "How fast zooming is.",
+			"min": 1,
+			"max": 50
 		},
 		"objects-title": {
 			"type": "title",
@@ -452,6 +474,53 @@
 			"min": 5,
             "max": 2000
 		},
+		"ScrollableObjects-title": {
+			"type": "title",
+			"name": "Scrollable Toolbar"
+		},
+		"ScrollableObjects-description": {
+			"type": "info",
+			"description": "Scroll through editor tabs instead of navigating per page.",
+			"color": "#000000"
+		},
+		"ScrollableObjects-enabled": {
+			"type": "bool",
+			"default": true,
+			"name": "Enabled",
+			"enable-if": "!loaded:razoom.object_groups",
+			"enable-if-description": "This feature is not compatible with Object Groups."
+		},
+		"ScrollableObjects-speed-modifier-key": {
+			"name": "Speed Modifier Key",
+			"description": "Key to hold to speed up scrolling the editor tab.",
+			"type": "keybind",
+			"default": ["Ctrl+LeftControl"],
+			"category": "editor"
+		},
+		"ScrollableObjects-speed-modifier": {
+			"name": "Speed Multiplier",
+			"description": "Scroll speed multiplier when modifier key is held.",
+			"type": "float",
+			"default": 5,
+			"min": 1,
+			"max": 50
+		},
+		"ScrollableObjects-scrollbar-height": {
+			"type": "float",
+			"default": 10,
+			"name": "Scrollbar Height",
+			"description": "The height the scrollbar at the bottom of the tab is.",
+			"min": 10,
+			"max": 20
+		},
+		"ScrollableObjects-y-offset": {
+			"type": "float",
+			"default": 2,
+			"name": "Tab Y Offset",
+			"description": "The Y offset of the whole tab.",
+			"min": 2,
+			"max": 16
+		},
 		"SingleDeselect-title": {
 			"type": "title",
 			"name": "Single Deselect"
@@ -527,6 +596,22 @@
 			"default": false,
 			"name": "Always show Edit Extras button",
 			"description": "Make the Edit Extras button always visible instead of replacing Edit Special."
+		},
+		"Keybinds-title": {
+			"type": "title",
+			"name": "Keybinds"
+		},
+		"Keybinds-description": {
+			"type": "info",
+			"description": "Extra keybinds for navigating the editor.",
+			"color": "#000000"
+		},
+		"Keybinds-edit-extras": {
+			"name": "Edit Extras",
+			"description": "Quickly access Edit Extras",
+			"type": "keybind",
+			"default": [],
+			"category": "editor"
 		}
 	},
 	"api": {

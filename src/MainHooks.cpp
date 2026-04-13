@@ -6,6 +6,7 @@
 #include <alphalaneous.alphas_geode_utils/include/ObjectModify.hpp>
 #include "ModuleRegistry.hpp"
 #include "Module.hpp"
+#include <Geode/ui/GeodeUI.hpp>
 
 using namespace geode::prelude;
 
@@ -27,6 +28,7 @@ class $modify(MainEditorUI, EditorUI) {
                     (void) hook->disable();
                 }
             }
+            EditorExitEvent().send();
         };
     };
 
@@ -43,10 +45,11 @@ class $modify(MainEditorUI, EditorUI) {
 
         for (const auto& createModule : ModuleRegistry<EditorModuleBase>::get()->m_modules) {
             auto module = createModule();
-            if (!module) continue;
             module->m_editorLayer = m_editorLayer;
             module->m_editorUI = this;
-            module->onEditor();
+            if (module->isEnabled()) {
+                module->onEditor();
+            }
             fields->m_modules.emplace_back(module);
         }
 
@@ -95,32 +98,10 @@ class $modify(MainEditorUI, EditorUI) {
 		auto fields = m_fields.self();
 
         for (auto& module : fields->m_modules) {
-            moduleCallback(module.get());
-        }
-    }
-
-    void addActiveAlert(FLAlertLayer* alert) {
-		auto fields = m_fields.self();
-
-        fields->m_activeAlerts.insert(alert);
-    }
-
-    void removeActiveAlert(FLAlertLayer* alert) {
-		auto fields = m_fields.self();
-
-        fields->m_activeAlerts.erase(alert);
-    }
-
-    void scrollWheel(float y, float x) {
-		auto fields = m_fields.self();
-
-        for (auto alert : fields->m_activeAlerts) {
-            if (alert && alert->getParentByType<CCScene>() && nodeIsVisible(alert)) {
-                return;
+            if (module->isEnabled()) {
+                moduleCallback(module.get());
             }
         }
-
-        EditorUI::scrollWheel(y, x);
     }
 
     static MainEditorUI* get() {
@@ -143,12 +124,39 @@ class $modify(MainSetGroupIDLayer, SetGroupIDLayer) {
 
 class $modify(MainEditorPauseLayer, EditorPauseLayer) {
 
+    struct Fields {
+        ~Fields() {
+            if (MainEditorUI::get()) {
+                MainEditorUI::get()->forEachModule([this] (EditorModuleBase* module) {
+                    module->m_pauseLayer = nullptr;
+                });
+            }
+        }
+    };
+
     bool init(LevelEditorLayer* layer) {
         if (!EditorPauseLayer::init(layer)) return false;
+        if (getUserFlag("ignore"_spr)) return true;
+
+        auto fields = m_fields.self();
         
         MainEditorUI::get()->forEachModule([this] (EditorModuleBase* module) {
+            module->m_pauseLayer = this;
             module->onEditorPauseLayer(this);
         });
+
+        auto guidelinesMenu = getChildByID("guidelines-menu");
+        if (!guidelinesMenu) return true;
+
+        auto spr = CircleButtonSprite::createWithSprite("tinker-hammer.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Small);
+
+        auto tinkerBtn = CCMenuItemExt::createSpriteExtra(spr, [] (auto sender) {
+            geode::openSettingsPopup(Mod::get());
+        });
+        tinkerBtn->setZOrder(1000);
+
+        guidelinesMenu->addChild(tinkerBtn);
+        guidelinesMenu->updateLayout();
 
         return true;
     }
@@ -158,70 +166,6 @@ class $modify(MainEditorPauseLayer, EditorPauseLayer) {
             module->onSave();
         });
         EditorPauseLayer::saveLevel();
-    }
-};
-
-class $baseModify(BlockingFLAlertLayer, FLAlertLayer) {
-    struct Fields {
-        FLAlertLayer* m_self;
-        ~Fields() {
-            auto editor = MainEditorUI::get();
-            if (!editor) return;
-
-            editor->removeActiveAlert(m_self);
-        }
-    };
-
-    void modify() {
-        auto editor = MainEditorUI::get();
-        if (!editor) return;
-
-        auto fields = m_fields.self();
-        fields->m_self = this;
-        editor->addActiveAlert(this);
-    }
-};
-
-class $classModify(FieldsCCTouchDispatcher, CCTouchDispatcher) {
-    struct Fields {
-        int m_targetPrio;
-
-        bool m_setPrio = false;
-        void setPrio(int target) {
-            if (!m_setPrio) {
-                m_targetPrio = target;
-                m_setPrio = true;
-            }
-        }
-    };
-};
-
-class $modify(MainCCTouchDispatcher, CCTouchDispatcher) {
-    void registerForcePrio(cocos2d::CCObject* obj, int value) {
-        auto orig = m_pForcePrioDict->objectForKey(obj->m_uID);
-        if (!orig) {
-            auto fields = reinterpret_cast<FieldsCCTouchDispatcher*>(this)->m_fields.self();
-
-            fields->setPrio(m_targetPrio);
-            fields->m_targetPrio -= value;
-
-            m_forcePrio += value;
-            m_targetPrio = fields->m_targetPrio + (EditorUI::get() ? -1000 : 0);
-            
-            m_pForcePrioDict->setObject(CCInteger::create(value), obj->m_uID);
-        }
-    }
-
-    void unregisterForcePrio(cocos2d::CCObject* obj) {
-        auto orig = static_cast<CCInteger*>(m_pForcePrioDict->objectForKey(obj->m_uID));
-        if (orig) {
-            auto fields = reinterpret_cast<FieldsCCTouchDispatcher*>(this)->m_fields.self();
-
-            m_forcePrio -= orig->getValue();
-            fields->m_targetPrio += orig->getValue();
-            m_targetPrio = fields->m_targetPrio;
-        }
-        m_pForcePrioDict->removeObjectForKey(obj->m_uID);
     }
 };
 

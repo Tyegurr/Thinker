@@ -6,6 +6,9 @@
 
 class $editorModule(RepeatingEditorButtons) {
     void onEditor() override;
+    bool onToggled(bool state) override;
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
+
     void onSetGroupIDLayer(SetGroupIDLayer* setGroupIDLayer, GameObject* obj, CCArray* objs) override;
     void applyRepeatIfExist(SetGroupIDLayer* setGroupIDLayer, ZStringView id);
     void recursivelySetRepeat(CCNode* node);

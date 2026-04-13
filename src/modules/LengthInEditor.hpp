@@ -10,4 +10,6 @@ class $editorModule(LengthInEditor) {
     void onObjectChange(float lastObjectX) override;
     void onGameTypeChange(bool isPlatformer) override;
 	std::string getTime(float x);
+
+    bool onToggled(bool state) override;
 };

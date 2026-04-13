@@ -3,7 +3,9 @@
 #include "../Module.hpp"
 #include <Geode/modify/CustomizeObjectLayer.hpp>
 
-class $editorModule(MultiTextEdit) {};
+class $editorModule(MultiTextEdit) {
+    bool onToggled(bool state) override;
+};
 
 class $modify(MTECustomizeObjectLayer, CustomizeObjectLayer) {
     $registerEditorHooks(MultiTextEdit, true);

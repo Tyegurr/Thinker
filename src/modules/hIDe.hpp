@@ -3,7 +3,10 @@
 #include "../Module.hpp"
 #include <Geode/modify/EditLevelLayer.hpp>
 
-class $globalModule(hIDe) {};
+class $globalModule(hIDe) {
+    bool onToggled(bool state) override;
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
+};
 
 class $modify(HDEditLevelLayer, EditLevelLayer){
     $registerGlobalHooks(hIDe, true)

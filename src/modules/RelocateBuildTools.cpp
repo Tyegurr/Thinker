@@ -25,6 +25,7 @@ void RelocateBuildTools::onEditor() {
     m_pauseLayer->setTouchEnabled(false);
     m_pauseLayer->setKeyboardEnabled(false);
     m_pauseLayer->setKeypadEnabled(false);
+    m_pauseLayer->setUserFlag("ignore"_spr);
     static_cast<RBTEditorPauseLayer*>(m_pauseLayer.data())->m_fields->m_noResume = true;
 
     CCTouchDispatcher::get()->unregisterForcePrio(m_pauseLayer);

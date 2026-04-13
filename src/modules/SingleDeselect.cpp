@@ -1,5 +1,14 @@
 #include "SingleDeselect.hpp"
 
+bool SingleDeselect::onToggled(bool state) {
+    onEditor();
+    return true;
+}
+
+bool SingleDeselect::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    return true;
+}
+
 void SDEditorUI::deselectSpecificObject() {
     auto pos = getMousePos();
     auto mousePosToNode = m_editorLayer->m_objectLayer->convertToNodeSpace(pos);
@@ -53,7 +62,9 @@ bool SDEditorUI::getKeyPressed() {
 }
 
 void SingleDeselect::onEditor() {
+    m_editorUI->removeEventListener("deselect-listener"_spr);
     m_editorUI->addEventListener(
+        "deselect-listener"_spr,
         KeybindSettingPressedEventV3(Mod::get(), "SingleDeselect-key"),
         [this](Keybind const& keybind, bool down, bool repeat, double timestamp) {
             m_keyHeld = down;

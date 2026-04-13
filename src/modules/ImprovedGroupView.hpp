@@ -13,6 +13,9 @@ class $editorModule(ImprovedGroupView) {
         std::vector<int> parentGroups;
         GameObject* object;
     };
+
+    bool onToggled(bool state) override;
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
 };
 
 class $modify(IGVSetGroupIDLayer, SetGroupIDLayer) {

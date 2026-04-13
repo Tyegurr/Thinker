@@ -7,6 +7,8 @@ class $editorModule(EditorSliderFix) {
     float m_lastObjectX = 0.f;
 
     void onObjectChange(float lastObjectX) override;
+
+    bool onToggled(bool state) override;
 };
 
 class $modify(ESFEditorUI, EditorUI) {

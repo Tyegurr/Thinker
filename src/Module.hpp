@@ -3,8 +3,14 @@
 #include "ModuleRegistry.hpp"
 #include <Geode/Geode.hpp>
 #include "Utils.hpp"
+#include "SettingsQueueHandler.hpp"
 
 using namespace geode::prelude;
+
+class EditorExitEvent : public Event<EditorExitEvent, bool()> {
+public:
+    using Event::Event;
+};
 
 template <class T, class Base>
 struct ModuleLoader {
@@ -26,43 +32,29 @@ private:
     static inline auto const $force = &$apply;
     static inline std::weak_ptr<T> $instance;
 
+    static inline matjson::Value $queuedSettings;
 public:
     static std::shared_ptr<T> create() {
         auto ret = std::make_shared<T>();
-
-        static constexpr auto enabledKey = tinker::utils::concat<Name, "-enabled">();
+        ret->ModuleBase::isEnabled = [] () {
+            return isEnabled();
+        };
 
         bool moduleEnabled = isEnabled();
 
-        if constexpr (std::is_same_v<Base, GlobalModuleBase>) {
+        $instance = ret;
 
-            listenForSettingChanges<bool>(enabledKey.data(), [ret] (bool enabled) {
-                bool moduleEnabled = isEnabled();
-
-                for (auto hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
-                    (void) hook->toggle(moduleEnabled);
+        if constexpr (std::is_same_v<Base, EditorModuleBase>) {
+            if (moduleEnabled) {
+                for (const auto& hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
+                    (void) hook->enable();
                 }
-                
-                if (moduleEnabled) $instance = ret;
-                else $instance.reset();
-            });
-
+            }
+        }
+        else {
             for (const auto& hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
                 (void) hook->toggle(moduleEnabled);
             }
-
-            if (moduleEnabled) $instance = ret;
-            else $instance.reset();
-
-            return ret;
-        }
-
-        if (!moduleEnabled) return nullptr;
-
-        $instance = ret;
-
-        for (const auto& hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
-            (void) hook->enable();
         }
 
         return ret;
@@ -89,20 +81,83 @@ public:
         return settingEnabled && getSetting<bool, "enabled">();
     }
 
+    static void globalHookToggle() {
+        if constexpr (std::is_same_v<Base, GlobalModuleBase>) {
+            auto enabled = isEnabled();
+            for (const auto& hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
+                (void) hook->toggle(enabled);
+            }
+        }
+    }
+
     template <class S, geode::utils::string::ConstexprString key>
     static const S& getSetting() {
         static constexpr auto fullKey = tinker::utils::concat<Name, "-", key>();
         static auto setting = Mod::get()->getSettingValue<S>(fullKey.data());
         static auto listener = listenForSettingChanges<S>(fullKey.data(), [] (S value) {
-            setting = std::move(value);
+            if (!EditorUI::get()) {
+                setting = value;
+                globalHookToggle();
+                return;
+            }
+            auto base = get();
+            if (!base) return;
+
+            if constexpr (tinker::utils::equals<fullKey, tinker::utils::concat<Name, "-enabled">()>()) {
+                if (!base->onToggled(value)) {
+                    $queuedSettings[key.data()] = value;
+                    SettingsQueueHandler::get()->addFeature(fullKey.data());
+                    return;
+                }
+                else {
+                    setting = value;
+                    auto enabled = isEnabled();
+                    for (const auto& hook : ModuleRegistry<Base>::get()->m_hooks[getName()]) {
+                        (void) hook->toggle(enabled);
+                    }
+                    return;
+                }
+            }
+            else {
+                auto enabled = isEnabled();
+                if (enabled && !base->onSettingChanged(key.data(), value)) {
+                    $queuedSettings[key.data()] = value;
+                    SettingsQueueHandler::get()->addSetting(fullKey.data());
+                    return;
+                }
+            }
+            
+            setting = value;
         });
+
+        static auto exitListener = EditorExitEvent().listen([] {
+            auto valueRes = $queuedSettings.get(key.data());
+            if (!valueRes) return;
+            matjson::Value s = valueRes.unwrap();
+            setting = s.as<S>().unwrapOrDefault();
+        });
+
         return setting;
     }
+    static inline auto $exitListener = EditorExitEvent().listen([] {
+        queueInMainThread([] {
+            globalHookToggle();
+            $queuedSettings.clear();
+        });
+    });
 };
 
-struct EditorModuleBase {
+struct ModuleBase {
+    geode::Function<bool()> isEnabled;
+
+    virtual bool onSettingChanged(std::string_view key, const matjson::Value& value) { return false; }
+    virtual bool onToggled(bool state) { return false; }
+};
+
+struct EditorModuleBase : public ModuleBase {
     LevelEditorLayer* m_editorLayer = nullptr;
     EditorUI* m_editorUI = nullptr;
+    EditorPauseLayer* m_pauseLayer = nullptr;
 
     virtual ~EditorModuleBase() = default;
 
@@ -115,7 +170,7 @@ struct EditorModuleBase {
     virtual void onGameTypeChange(bool isPlatformer) {}
 };
 
-struct GlobalModuleBase {
+struct GlobalModuleBase : public ModuleBase {
 };
 
 template <class T, geode::utils::string::ConstexprString Name>

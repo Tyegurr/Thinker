@@ -2,6 +2,14 @@
 #include "../../include/ImprovedGroupView.hpp"
 #include <spaghettdev.named-editor-groups/api/NIDManager.hpp>
 
+bool ImprovedGroupView::onToggled(bool state) {
+    return true;
+}
+
+bool ImprovedGroupView::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    return true;
+}
+
 bool IGVSetGroupIDLayer::init(GameObject* obj, cocos2d::CCArray* objs) {
     if (!SetGroupIDLayer::init(obj, objs)) return false;
 
@@ -23,6 +31,10 @@ bool IGVSetGroupIDLayer::init(GameObject* obj, cocos2d::CCArray* objs) {
             replacementMenu->addChild(btn);
         }
         if (auto btn = node->getChildByID("z-layer-increment-button")) {
+            btn->removeFromParentAndCleanup(false);
+            replacementMenu->addChild(btn);
+        }
+        if (auto btn = node->getChildByID("settings-button")) {
             btn->removeFromParentAndCleanup(false);
             replacementMenu->addChild(btn);
         }
@@ -220,6 +232,7 @@ void IGVSetGroupIDLayer::regenerateGroupView() {
     fields->m_scrollLayer->addChild(menuContainer);
     fields->m_scrollLayer->setID("groups-list-scroll-layer"_spr);
     fields->m_scrollLayer->setTouchPriority(-504);
+    fields->m_scrollLayer->setScrollDelta(1.5f);
 
     m_mainLayer->addChild(fields->m_scrollLayer);
 

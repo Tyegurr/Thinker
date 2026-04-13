@@ -1,5 +1,9 @@
 #include "MultiTextEdit.hpp"
 
+bool MultiTextEdit::onToggled(bool state) {
+    return true;
+}
+
 bool MTECustomizeObjectLayer::init(GameObject* object, CCArray* objects) {
     if (object) return CustomizeObjectLayer::init(object, objects);
 

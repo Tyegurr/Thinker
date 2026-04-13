@@ -5,7 +5,9 @@
 
 class $editorModule(SingleDeselect) {
 	void onEditor() override;
-
+    bool onToggled(bool state) override;
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
+	
 	bool m_keyHeld;
 };
 

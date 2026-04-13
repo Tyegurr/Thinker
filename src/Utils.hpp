@@ -196,4 +196,13 @@ namespace tinker::utils {
         else
             return concat2<First, concat<Rest...>()>();
     }
+
+    template <geode::utils::string::ConstexprString a, geode::utils::string::ConstexprString b>
+    constexpr bool equals() {
+        if (a.size() != b.size()) return false;
+        for (std::size_t i = 0; i < a.size(); ++i) {
+            if (a.data()[i] != b.data()[i]) return false;
+        }
+        return true;
+    }
 }

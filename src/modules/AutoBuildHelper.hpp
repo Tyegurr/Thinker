@@ -10,6 +10,15 @@ class $editorModule(AutoBuildHelper) {
     void onEditor() override;
     void onEditorPauseLayer(EditorPauseLayer* editorPauseLayer) override;
 
+    void removeFromEditorUI();
+    void removeFromPause();
+
+    void showOnEditorUI();
+    void showOnPause();
+
+    bool onToggled(bool state) override;
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
+
     void onToggleAutoBuildHelper(CCObject* sender);
 };
 

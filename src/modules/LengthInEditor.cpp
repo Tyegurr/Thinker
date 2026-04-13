@@ -1,5 +1,19 @@
 #include "LengthInEditor.hpp"
 
+bool LengthInEditor::onToggled(bool state) {
+    if (state) {
+        onEditor();
+    }
+    else {
+        m_editorUI->m_uiItems->removeObject(m_lengthContainer);
+        m_lengthContainer->removeFromParent();
+
+        auto objectInfoLabel = m_editorUI->getChildByID("object-info-label");
+        objectInfoLabel->setPosition({objectInfoLabel->getPositionX(), objectInfoLabel->getPositionY() + 25});
+    }
+    return true;
+}
+
 void LengthInEditor::onEditor() {
     auto winSize = CCDirector::get()->getWinSize();
     auto objectInfoLabel = m_editorUI->getChildByID("object-info-label");

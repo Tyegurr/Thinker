@@ -6,14 +6,15 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <alphalaneous.alphas-ui-pack/include/API.hpp>
 
-class $globalModule(ScrollableObjects) {};
+class $globalModule(ScrollableObjects) {
+    bool canScroll();
+};
 
 class $modify(SOEditorUI, EditorUI) {
     $registerGlobalHooks(ScrollableObjects, true)
 
     bool init(LevelEditorLayer* editorLayer);
     void updateCreateMenu(bool selectTab);
-    void scrollWheel(float y, float x);
 
     static void _onModify(auto& self) {
         (void) self.setHookPriorityAfterPost("EditorUI::init", "alphalaneous.editortab_api");

@@ -1,6 +1,10 @@
 #include "FixTextSplit.hpp"
 #include <Geode/utils/base64.hpp>
 
+bool FixTextSplit::onToggled(bool state) {
+    return true;
+}
+
 void FTSCustomizeObjectLayer::onBreakApart(cocos2d::CCObject* sender) {
     std::vector<TextObjectAttributes> points;
 

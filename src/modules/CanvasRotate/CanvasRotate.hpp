@@ -15,6 +15,9 @@ class $editorModule(CanvasRotate) {
     bool m_editorLoaded;
 
     void onEditor() override;
+    void toggleBetterEditHook(bool enabled);
+
+    bool onToggled(bool state) override;
 };
 
 class $modify(CREditorUI, EditorUI) {
@@ -36,7 +39,6 @@ class $modify(CREditorUI, EditorUI) {
     void ccTouchMoved(CCTouch* touch, CCEvent* p1);
     void ccTouchEnded(CCTouch* touch, CCEvent* p1);
     void ccTouchCancelled(CCTouch* touch, CCEvent* p1);
-    void scrollWheel(float y, float x);
     void triggerSwipeMode();
 };
 

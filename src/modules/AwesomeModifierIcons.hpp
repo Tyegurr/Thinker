@@ -12,6 +12,7 @@ class $modify(AMIEffectGameObject, EffectGameObject) {
     $registerGlobalHooks(AwesomeModifierIcons)
 
 	void customSetup();
+    void updateLetters();
 };
 
 class $modify(AMIEditorUI, EditorUI) {

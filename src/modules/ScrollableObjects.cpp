@@ -57,22 +57,30 @@ bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
     return true;
 }
 
-void SOEditorUI::scrollWheel(float y, float x) {
-    auto mousePos = getMousePos();
-    if (mousePos.y < m_toolbarHeight) {
+bool ScrollableObjects::canScroll() {
+    auto editorUI = EditorUI::get();
+    if (!editorUI) return false;
 
-        for (auto child : getChildrenExt()) {
-            if (!nodeIsVisible(child)) continue;
+    auto mode = alpha::editor_tabs::getCurrentMode().unwrapOrDefault();
+    auto tab = alpha::editor_tabs::getCurrentTab().unwrapOrDefault();
 
-            if (auto bar = static_cast<SOEditButtonBar*>(typeinfo_cast<EditButtonBar*>(child))) {
-                auto barFields = bar->m_fields.self();
-                barFields->m_scrollBar->scroll(x, y);
-            }
+    auto betterEdit = tinker::utils::getMod<"hjfod.betteredit">();
+
+    if (betterEdit && betterEdit->getSettingValue<bool>("new-edit-menu")) {
+        if (mode == alpha::editor_tabs::EDIT && tab == "edit") {
+            return true;
         }
-
-        return;
     }
-    EditorUI::scrollWheel(y, x);
+    if (mode == alpha::editor_tabs::DELETE && tab == "delete") {
+        return true;
+    }
+
+    auto mousePos = getMousePos();
+    if (mousePos.y < EditorUI::get()->m_toolbarHeight) {
+        return false;
+    }
+
+    return true;
 }
 
 void SOEditorUI::updateCreateMenu(bool selectTab) {
@@ -210,7 +218,12 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
         dots->setVisible(false);
     }
 
-    auto newSize = CCSize{size.width + fields->m_widthOffset, size.height - 18.f};
+    float scrollHeight = ScrollableObjects::getSetting<float, "scrollbar-height">();
+    float scrollPadding = 2.f;
+    float topPadding = 6.f;
+    float bottomPadding = ScrollableObjects::getSetting<float, "y-offset">();
+
+    auto newSize = CCSize{size.width + fields->m_widthOffset, size.height - scrollHeight - scrollPadding - bottomPadding - topPadding};
 
     float gap = 5.f;
     float height = rows * (40.f + gap) - gap; 
@@ -275,8 +288,8 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     fields->m_objectsMenu->setContentSize({width, height});
 
     fields->m_scrollLayer = alpha::ui::AdvancedScrollLayer::create(newSize);
-    fields->m_scrollLayer->setPosition({0, getContentHeight() / 2 + 3.f});
-    fields->m_scrollLayer->setAnchorPoint({0.f, 0.5f});
+    fields->m_scrollLayer->setPosition({0, scrollPadding + bottomPadding + scrollHeight});
+    fields->m_scrollLayer->setAnchorPoint({0.f, 0.f});
     fields->m_scrollLayer->setHorizontalScroll(true);
     fields->m_scrollLayer->setHorizontalScrollWheel(true);
     fields->m_scrollLayer->setVerticalScroll(false);
@@ -299,9 +312,9 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     fields->m_scrollLayer->setLayout(fields->m_scrollLayout);
 
     fields->m_scrollBar = alpha::ui::AdvancedScrollBar::create(fields->m_scrollLayer, alpha::ui::ScrollOrientation::HORIZONTAL);
-    fields->m_scrollBar->setContentWidth(10);
+    fields->m_scrollBar->setContentWidth(scrollHeight);
     fields->m_scrollBar->setContentHeight(newSize.width - 10);
-    fields->m_scrollBar->setPosition(fields->m_scrollBar->getPosition() + CCPoint{0, 4});
+    fields->m_scrollBar->setPosition({fields->m_scrollBar->getPosition().x, bottomPadding + scrollHeight / 2});
     fields->m_scrollBar->setID("buttons-scroll-bar"_spr);
 
     addChild(fields->m_scrollLayer);

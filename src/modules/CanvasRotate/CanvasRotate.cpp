@@ -1,37 +1,37 @@
 #include "CanvasRotate.hpp"
 #include "RotationNode.hpp"
 #include "../../Utils.hpp"
+#include "../NavigationCircle/JoystickNavigation.hpp"
 
 using namespace tinker::ui;
 
-void toggleBetterEditHook(bool enabled) {
-    auto betterEdit = tinker::utils::getMod<"hjfod.betteredit">();
-    if (!betterEdit) return;
-
-    for (auto hook : betterEdit->getHooks()) {
-        if (hook->getDisplayName() == "EditorUI::scrollWheel") {
-            (void) hook->toggle(enabled);
-            break;
-        }
+bool CanvasRotate::onToggled(bool state) {
+    if (state) {
+        onEditor();
+        // fixes weird bug where touch stops working
+        m_editorUI->runAction(CallFuncExt::create([this] {
+            m_rotationNode->onExit();
+            m_rotationNode->onEnter();
+        }));
     }
+    else {
+        if (m_rotationNode) {
+            m_rotationNode->removeFromParent();
+        }
+        m_editorLayer->m_gameState.m_cameraAngle = 0;
+    }
+    if (JoystickNavigation::isEnabled()) {
+        JoystickNavigation::get()->updateController(state);
+    }
+    return true;
 }
 
 void CanvasRotate::onEditor() {
-    toggleBetterEditHook(false);
-
     m_rotationNode = RotationNode::create(m_editorUI);
     m_rotationNode->setID("rotation-node"_spr);
     m_editorUI->addChild(m_rotationNode);
 
     m_editorLoaded = true;
-}
-
-$on_game(Loaded) {
-    toggleBetterEditHook(!CanvasRotate::isEnabled());
-
-    listenForSettingChanges<bool>("CanvasRotate-enabled", [] (bool enabled) {
-        toggleBetterEditHook(!CanvasRotate::isEnabled());
-    });
 }
 
 void CREditorUI::moveObject(GameObject* p0, CCPoint p1) {
@@ -152,55 +152,7 @@ void CREditorUI::ccTouchCancelled(CCTouch* touch, CCEvent* p1) {
     EditorUI::ccTouchCancelled(touch, p1);
 }
 
-void CREditorUI::scrollWheel(float y, float x) {
-    if (CCKeyboardDispatcher::get()->getShiftKeyPressed()) {
-        std::swap(x, y);
-    }
-
-    auto module = CanvasRotate::get();
-
-    float rot = module->m_rotationNode->getCanvasRotation();
-
-    if (CCKeyboardDispatcher::get()->getControlKeyPressed()) {
-        auto layer = m_editorLayer->m_objectLayer;
-        float currentScale = layer->getScale();
-        auto winSize = CCDirector::get()->getWinSize();
-        auto mousePos = tinker::utils::rotatePointAroundPivot(getMousePos(), winSize/2, rot);
-        auto offset = mousePos - layer->getPosition();
-
-        float zoomFactor = 1.05f;
-        float zoomSpeed = 0.2f;
-
-        float zoomLimit = 4.f;
-
-        if (tinker::utils::getMod<"hjfod.betteredit">()) {
-            zoomLimit = 10000000.f;
-        }
-
-        float newScale = currentScale * std::powf(zoomFactor, -y * zoomSpeed);
-        newScale = std::min(std::max(newScale, 0.1f), zoomLimit);
-
-        float scaleRatio = newScale / currentScale;
-        auto newPos = mousePos - offset * scaleRatio;
-
-        layer->setScale(newScale);
-        layer->setPosition(newPos);
-
-        updateZoom(newScale);
-        return;
-    }
-
-    #ifdef GEODE_IS_WINDOWS
-        x *= -1;
-    #endif
-
-    auto newPos = tinker::utils::rotatePointAroundPivot({x, y}, {0, 0}, rot);
-
-    EditorUI::scrollWheel(newPos.y, newPos.x);
-}
-
 CCArray* CRLevelEditorLayer::objectsInRect(CCRect rect, bool ignoreLayerCheck) {
-    //return LevelEditorLayer::objectsInRect(rect, ignoreLayerCheck);
     auto result = CCArray::create();
 
     auto center = rect.origin + CCPoint(rect.size.width * 0.5f, rect.size.height * 0.5f);
@@ -214,7 +166,16 @@ CCArray* CRLevelEditorLayer::objectsInRect(CCRect rect, bool ignoreLayerCheck) {
         if (!ignoreLayerCheck) {
             bool isOnCurrentEditorLayer1 = object->m_editorLayer == m_currentLayer;
             bool isOnCurrentEditorLayer2 = (object->m_editorLayer2 == m_currentLayer) && object->m_editorLayer2 != 0;
-            if (!isOnCurrentEditorLayer1 && !isOnCurrentEditorLayer2 && m_currentLayer != -1) return;
+
+            bool locked = false;
+
+            auto max = std::max(object->m_editorLayer, object->m_editorLayer2);
+
+            if (m_lockedLayers.size() > max) {
+                locked = m_lockedLayers[object->m_editorLayer] || (object->m_editorLayer2 != 0 && m_lockedLayers[object->m_editorLayer2]);
+            }
+
+            if ((!isOnCurrentEditorLayer1 && !isOnCurrentEditorLayer2 && m_currentLayer != -1) || locked) return;
         }
 
         if (selectionOBB->overlaps(rotatedOBB2D(object, centerInObjectLayer, m_gameState.m_cameraAngle))) {

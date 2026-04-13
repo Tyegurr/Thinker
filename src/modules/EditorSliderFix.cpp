@@ -1,5 +1,9 @@
 #include "EditorSliderFix.hpp"
 
+bool EditorSliderFix::onToggled(bool state) {
+    return true;
+}
+
 void EditorSliderFix::onObjectChange(float lastObjectX) {
     m_lastObjectX = lastObjectX;
     m_editorUI->updateSlider();

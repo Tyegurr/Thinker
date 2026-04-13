@@ -1,3 +1,20 @@
+# 1.0.0-beta.15
+- <c-dddddd>Tweak scroll delta in Improved Group View</c>
+- <c-dddddd>Fix missing vanilla group offset button</c>
+- <c-dddddd>Add scrollbar height and y offset settings for Scrollable Toolbar</c>
+- <c-dddddd>Add settings button in the editor pause menu</c>
+- <c-dddddd>Fix the editor not having scroll when the color select and hsv popup is visible</c>
+- <c-dddddd>Fix locked layers not being respected</c>
+- <c-dddddd>Reimplement editor scroll altogether to make it easier to deal with (trackpad scroll probably works on windows now, haven't tested)</c>
+- <c-dddddd>Add option for smooth scroll and zoom in the editor</c>
+- <c-dddddd>Add option for scroll and zoom multipliers</c>
+- <c-dddddd>Make the selection box stick to the object layer</c>
+- <c-dddddd>Fix Improved Transform Controls crash and button scale</c>
+- <c-dddddd>Fix Modifier Icon letter never being hidden when the setting is off</c>
+- <c-dddddd>Add keybind for Edit Extras</c>
+- <c-dddddd>Add scroll modifier keybind and multiplier for the scrollable tabs</c>
+- <c-dddddd>Allow scroll while mouse is hovered in the edit tab when BetterEdit's custom move menu is enabled, and delete tab</c>
+
 # 1.0.0-beta.14
 - <c-dddddd>Infinite zoom now works with BetterEdit again</c>
 - <c-dddddd>Fix horizontal scroll breaking</c>

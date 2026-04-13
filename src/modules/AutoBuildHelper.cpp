@@ -1,8 +1,66 @@
 #include "AutoBuildHelper.hpp"
 
-void AutoBuildHelper::onEditor() {
-    if (getSetting<bool, "show-on-pause">()) return;
+void AutoBuildHelper::removeFromEditorUI() {
+    if (!m_bhToggler) return;
+    m_editorUI->m_uiItems->removeObject(m_bhToggler);
+    m_bhToggler->removeFromParent();
 
+    auto menu = m_editorUI->getChildByID("toolbar-toggles-menu");
+    if (menu) {
+        menu->updateLayout();
+    }
+    m_bhToggler = nullptr;
+}
+
+void AutoBuildHelper::removeFromPause() {
+    if (!m_bhToggler || !m_pauseLayer) return;
+
+    m_bhToggler->removeFromParent();
+
+    auto menu = m_pauseLayer->getChildByID("guidelines-menu");
+    if (menu) {
+        menu->updateLayout();
+    }
+    m_bhToggler = nullptr;
+}
+
+bool AutoBuildHelper::onToggled(bool state) {
+    if (state) {
+        onEditor();
+        if (m_pauseLayer) {
+            onEditorPauseLayer(m_pauseLayer);
+        }
+    }
+    else {
+        if (getSetting<bool, "show-on-pause">()) {
+            removeFromPause();
+        }
+        else {
+            removeFromEditorUI();
+        }
+    }
+
+    return true;
+}
+
+bool AutoBuildHelper::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    if (key == "show-on-pause") {
+        auto res = value.asBool();
+        if (!res) return true;
+        auto onPause = res.unwrap();
+        if (onPause) {
+            removeFromEditorUI();
+            showOnPause();
+        }
+        else {
+            removeFromPause();
+            showOnEditorUI();
+        }
+    }
+    return true;
+}
+
+void AutoBuildHelper::showOnEditorUI() {
     auto menu = m_editorUI->getChildByID("toolbar-toggles-menu");
     if (!menu) return;
 
@@ -34,10 +92,10 @@ void AutoBuildHelper::onEditor() {
     m_editorUI->m_uiItems->addObject(m_bhToggler);
 }
 
-void AutoBuildHelper::onEditorPauseLayer(EditorPauseLayer* editorPauseLayer) {
-    if (!getSetting<bool, "show-on-pause">()) return;
+void AutoBuildHelper::showOnPause() {
+    if (!m_pauseLayer) return;
 
-    auto menu = typeinfo_cast<CCMenu*>(editorPauseLayer->getChildByID("guidelines-menu"));
+    auto menu = m_pauseLayer->getChildByID("guidelines-menu");
     if (!menu) return;
 
     auto autoBuildHelperSpr = CCSprite::create("build_helper.png"_spr);
@@ -55,8 +113,20 @@ void AutoBuildHelper::onEditorPauseLayer(EditorPauseLayer* editorPauseLayer) {
     m_bhToggler = CCMenuItemToggler::create(autoBuildHelperSprOff, autoBuildHelperSprOn, EditorUI::get(), menu_selector(AutoBuildHelper::onToggleAutoBuildHelper));
     m_bhToggler->setID("auto-build-helper-button"_spr);
     m_bhToggler->toggle(Mod::get()->getSavedValue<bool>("auto-build-helper-toggle", false));
+    m_bhToggler->setZOrder(999);
+
     menu->addChild(m_bhToggler);
     menu->updateLayout();
+}
+
+void AutoBuildHelper::onEditor() {
+    if (getSetting<bool, "show-on-pause">()) return;
+    showOnEditorUI();
+}
+
+void AutoBuildHelper::onEditorPauseLayer(EditorPauseLayer* editorPauseLayer) {
+    if (!getSetting<bool, "show-on-pause">()) return;
+    showOnPause();
 }
 
 void AutoBuildHelper::onToggleAutoBuildHelper(CCObject* sender) {

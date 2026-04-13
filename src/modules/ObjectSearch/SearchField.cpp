@@ -5,6 +5,7 @@
 #include <Geode/external/fts/fts_fuzzy_match.h>
 #include "../../Utils.hpp"
 #include "ObjectSearch.hpp"
+#include "../ScrollableObjects.hpp"
 
 using namespace tinker::ui;
 
@@ -244,10 +245,15 @@ void SearchField::textInputShouldOffset(CCTextInputNode* node, float yOffset) {
 void SearchField::setupTabOffset() {
     setPositionY(m_yOffset);
 
-    auto tab = m_editorUI->m_fields->m_searchBar;
-    tab->setPositionY(m_yOffset + getScaledContentHeight() + 10);
+    float heightOffset = 2;
+    if (ScrollableObjects::isEnabled()) {
+        heightOffset = ScrollableObjects::getSetting<float, "y-offset">();
+    }
 
-    m_tabBG->setContentSize(tab->getScaledContentSize() + CCSize{0, 10});
+    auto tab = m_editorUI->m_fields->m_searchBar;
+    tab->setPositionY(m_yOffset + getScaledContentHeight() + 10 - heightOffset + 2);
+    
+    m_tabBG->setContentSize(tab->getScaledContentSize() + CCSize{0, 10 - heightOffset * tab->getScale() + 2});
     m_tabBG->setPosition(tab->getPosition() + CCPoint{0, tab->getScaledContentHeight() / 2});
     tab->setZOrder(20);
     m_tabBG->setZOrder(19);
