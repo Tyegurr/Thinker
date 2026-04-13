@@ -27,7 +27,9 @@ void AMIEffectGameObject::customSetup() {
 
     spr->setScale(0.9f);
     addChildAtPosition(spr, Anchor::Center);
-    updateLetters();
+    runAction(CallFuncExt::create([this] {
+        updateLetters();
+    }));
 }
 
 void AMIEffectGameObject::updateLetters() {

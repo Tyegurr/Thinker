@@ -1,3 +1,6 @@
+# 1.0.0-beta.16
+- <c-dddddd>Fix modifier icons letter never being hidden when the setting is off (again)</c>
+
 # 1.0.0-beta.15
 - <c-dddddd>Tweak scroll delta in Improved Group View</c>
 - <c-dddddd>Fix missing vanilla group offset button</c>
