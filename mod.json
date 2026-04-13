@@ -8,7 +8,7 @@
 	},
 	"id": "alphalaneous.tinker",
 	"name": "Tinker",
-	"version": "v1.0.0-beta.18",
+	"version": "v1.0.0-beta.19",
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
@@ -105,6 +105,24 @@
 			"default": true,
 			"name": "Enable Smooth Scroll",
 			"description": "Make scrolling and zooming in the editor smoother."
+		},
+		"zoom-to-cursor": {
+			"type": "bool",
+			"default": true,
+			"name": "Enable Zoom to Cursor",
+			"description": "Make scroll wheel zooming based on the cursor position."
+		},
+		"invert-vertical-scroll": {
+			"type": "bool",
+			"default": false,
+			"name": "Invert Vertical Scroll",
+			"description": "Scroll wheel goes the opposite direction vertically."
+		},
+		"invert-horizontal-scroll": {
+			"type": "bool",
+			"default": false,
+			"name": "Invert Horizontal Scroll",
+			"description": "Scroll wheel goes the opposite direction horizontally."
 		},
 		"scroll-multiplier": {
 			"type": "float",
@@ -504,6 +522,12 @@
 			"default": 5,
 			"min": 1,
 			"max": 50
+		},
+		"ScrollableObjects-invert-scroll": {
+			"type": "bool",
+			"default": false,
+			"name": "Invert Scroll",
+			"description": "Invert the direction scrolling on the tab goes."
 		},
 		"ScrollableObjects-scrollbar-height": {
 			"type": "float",

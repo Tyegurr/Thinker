@@ -1,3 +1,14 @@
+# 1.0.0-beta.19
+- <c-dddddd>Fix missing bounds for scrolling</c>
+- <c-dddddd>Fix potential divide by 0 issue with zoom</c>
+- <c-dddddd>Add invert vertical and horizontal scroll settings</c>
+- <c-dddddd>Add invert scroll setting for scrollable toolbars</c>
+- <c-dddddd>Allow disabling zoom to cursor</c>
+- <c-dddddd>Fix mac scrolling (I think)</c>
+- <c-dddddd>Fix letting go of shift keeping swipe active</c>
+- <c-dddddd>Fix selection bounds on rotated objects</c>
+- <c-dddddd>Added repositioning check if the editor camera seems to be invalid</c>
+
 # 1.0.0-beta.18
 - <c-dddddd>Fix transform control buttons in Improved Transform Controls not being clickable</c>
 - <c-dddddd>Fix a crash when Improved Transform Controls was clicked outside its bounds</c>

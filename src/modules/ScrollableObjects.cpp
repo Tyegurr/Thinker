@@ -2,6 +2,11 @@
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 #include <alphalaneous.alphas_geode_utils/include/ObjectModify.hpp>
 
+bool ScrollableObjects::onSettingChanged(std::string_view key, const matjson::Value& value) {
+    if (key == "invert-scroll") return true;
+    return false;
+}
+
 bool SOEditorUI::init(LevelEditorLayer* editorLayer) {
     if (!EditorUI::init(editorLayer)) return false;
 

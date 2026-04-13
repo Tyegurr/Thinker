@@ -187,13 +187,12 @@ CCArray* CRLevelEditorLayer::objectsInRect(CCRect rect, bool ignoreLayerCheck) {
 }
 
 OBB2D* CRLevelEditorLayer::rotatedOBB2D(GameObject* object, CCPoint pivot, float degrees) {
-    auto obb = OBB2D::create(object->getPosition(), object->boundingBox().size.width, object->boundingBox().size.height, CC_DEGREES_TO_RADIANS(object->getRotation()));
+    auto obb = OBB2D::create(object->getPosition(), object->boundingBox().size.width, object->boundingBox().size.height, 0);
 
     auto center = obb->m_center;
 
     float width = object->boundingBox().size.width;
     float height = object->boundingBox().size.height;
-    float angle = CC_DEGREES_TO_RADIANS(object->getRotation());
 
     float radians = -CC_DEGREES_TO_RADIANS(degrees);
     float dx = center.x - pivot.x;
@@ -204,5 +203,5 @@ OBB2D* CRLevelEditorLayer::rotatedOBB2D(GameObject* object, CCPoint pivot, float
         pivot.y + dx * std::sin(radians) + dy * std::cos(radians)
     };
 
-    return OBB2D::create(rotatedCenter, width, height, angle + radians);
+    return OBB2D::create(rotatedCenter, width, height, radians);
 }

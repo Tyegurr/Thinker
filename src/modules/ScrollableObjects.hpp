@@ -8,6 +8,7 @@
 
 class $globalModule(ScrollableObjects) {
     bool canScroll();
+    bool onSettingChanged(std::string_view key, const matjson::Value& value) override;
 };
 
 class $modify(SOEditorUI, EditorUI) {

@@ -35,6 +35,10 @@ class $modify(InputEditorUI, EditorUI) {
     void removeActiveAlert(FLAlertLayer* alert);
 
     bool hasSmoothScroll();
+    bool hasZoomToCursor();
+    bool invertVerticalScroll();
+    bool invertHorizontalScroll();
+    
     float getScrollMultiplier();
     float getZoomMultiplier();
     float getToolbarScrollSpeedMultiplier();

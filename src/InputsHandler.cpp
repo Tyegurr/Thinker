@@ -32,7 +32,7 @@ bool InputEditorUI::init(LevelEditorLayer* editorLayer) {
     schedule(schedule_selector(InputEditorUI::checkScrolling));
 
     addEventListener(ScrollWheelEvent(), [this](double x, double y) {
-        onScroll(x * -1, y * -1);
+        onScroll(x, y);
     });
     addEventListener(KeybindSettingPressedEvent(Mod::get(), "ScrollableObjects-speed-modifier-key"), [this, fields] (Keybind const& keybind, bool down, bool repeat, double timestamp) {
         fields->m_tabModifierHeld = down;
@@ -51,12 +51,51 @@ bool InputEditorUI::init(LevelEditorLayer* editorLayer) {
         }
     });
 
+    addEventListener(KeyboardInputEvent(enumKeyCodes::KEY_LeftShift), [this] (KeyboardInputData& data) {
+        if (data.action == KeyboardInputData::Action::Release) {
+            m_swipeActive = false;
+        }
+    });
+    addEventListener(KeyboardInputEvent(enumKeyCodes::KEY_RightShift), [this] (KeyboardInputData& data) {
+        if (data.action == KeyboardInputData::Action::Release) {
+            m_swipeActive = false;
+        }
+    });
+
+    if (!std::isfinite(editorLayer->m_objectLayer->getPosition().x) || !std::isfinite(editorLayer->m_objectLayer->getPosition().y)) {
+        editorLayer->m_objectLayer->setPosition({0, 90});
+    }
+
     return true;
 }
 
 bool InputEditorUI::hasSmoothScroll() {
     static auto enabled = Mod::get()->getSettingValue<bool>("smooth-scroll-enabled");
     static auto listener = listenForSettingChanges<bool>("smooth-scroll-enabled", [] (bool value) {
+        enabled = value;
+    });
+    return enabled;
+}
+
+bool InputEditorUI::hasZoomToCursor() {
+    static auto enabled = Mod::get()->getSettingValue<bool>("zoom-to-cursor");
+    static auto listener = listenForSettingChanges<bool>("zoom-to-cursor", [] (bool value) {
+        enabled = value;
+    });
+    return enabled;
+}
+
+bool InputEditorUI::invertVerticalScroll() {
+    static auto enabled = Mod::get()->getSettingValue<bool>("invert-vertical-scroll");
+    static auto listener = listenForSettingChanges<bool>("invert-vertical-scroll", [] (bool value) {
+        enabled = value;
+    });
+    return enabled;
+}
+
+bool InputEditorUI::invertHorizontalScroll() {
+    static auto enabled = Mod::get()->getSettingValue<bool>("invert-horizontal-scroll");
+    static auto listener = listenForSettingChanges<bool>("invert-horizontal-scroll", [] (bool value) {
         enabled = value;
     });
     return enabled;
@@ -89,6 +128,14 @@ float InputEditorUI::getToolbarScrollSpeedMultiplier() {
 void InputEditorUI::onScroll(float x, float y) {
     auto fields = m_fields.self();
 
+    #ifdef GEODE_IS_MACOS
+    float xMult = 1;
+    float yMult = 1;
+    #else
+    float xMult = 1;
+    float yMult = -1;
+    #endif
+
     for (auto alert : fields->m_activeAlerts) {
         if (alert && alert->getParentByType<CCScene>() && nodeIsVisible(alert)) {
             return;
@@ -99,10 +146,12 @@ void InputEditorUI::onScroll(float x, float y) {
         for (auto child : getChildrenExt()) {
             if (!nodeIsVisible(child)) continue;
 
+            bool invertScroll = ScrollableObjects::getSetting<bool, "invert-scroll">();
+
             if (auto bar = static_cast<SOEditButtonBar*>(typeinfo_cast<EditButtonBar*>(child))) {
                 auto barFields = bar->m_fields.self();
                 float multiplier = fields->m_tabModifierHeld ? 12 * getToolbarScrollSpeedMultiplier() : 12;
-                barFields->m_scrollBar->scroll(x * multiplier, y * multiplier);
+                barFields->m_scrollBar->scroll((x * multiplier) * xMult * (invertScroll ? -1 : 1), (y * multiplier) * yMult * (invertScroll ? -1 : 1));
             }
         }
         return;
@@ -121,10 +170,17 @@ void InputEditorUI::onScroll(float x, float y) {
             fields->m_startSwipe = layer->convertToNodeSpace(m_swipeStart);
             fields->m_activeZoom = true;
         }
+        fields->m_targetScale = std::max(fields->m_targetScale,0.1f);
 
         auto winSize = CCDirector::get()->getWinSize();
-        auto mousePos = tinker::utils::rotatePointAroundPivot(getMousePos(), winSize/2, m_editorLayer->m_gameState.m_cameraAngle);
-        auto offset = mousePos - fields->m_targetPos;
+        CCPoint zoomPos;
+        if (hasZoomToCursor()) {
+            zoomPos = tinker::utils::rotatePointAroundPivot(getMousePos(), winSize/2, m_editorLayer->m_gameState.m_cameraAngle);
+        }
+        else {
+            zoomPos = winSize / 2;
+        }
+        auto offset = zoomPos - fields->m_targetPos;
 
         float zoomFactor = 1.05f;
         float zoomSpeed = 0.2f;
@@ -134,7 +190,7 @@ void InputEditorUI::onScroll(float x, float y) {
             zoomLimit = 10000000.f;
         }
 
-        float newY = y * getZoomMultiplier();
+        float newY = (y * getZoomMultiplier()) * yMult;
 
         float newScale = fields->m_targetScale * std::powf(zoomFactor, -newY * zoomSpeed);
         newScale = std::min(std::max(newScale, 0.1f), zoomLimit);
@@ -144,7 +200,7 @@ void InputEditorUI::onScroll(float x, float y) {
         auto oldPos = fields->m_targetPos;
         auto oldScale = fields->m_targetScale;
 
-        fields->m_targetPos = mousePos - offset * scaleRatio;
+        fields->m_targetPos = zoomPos - offset * scaleRatio;
         fields->m_targetScale = newScale;
 
         if (hasSmoothScroll()) {
@@ -152,6 +208,7 @@ void InputEditorUI::onScroll(float x, float y) {
                 if (fields->m_moveX) layer->stopAction(fields->m_moveX);
                 fields->m_moveX = CCEaseOut::create(CCCallbackAction::create(CCMoveToX::create(0.1f, fields->m_targetPos.x), [this, fields] (auto target) {
                     m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
+                    constrainGameLayerPosition();
                 }), 1.2f);
                 layer->runAction(fields->m_moveX);
             }
@@ -159,6 +216,7 @@ void InputEditorUI::onScroll(float x, float y) {
                 if (fields->m_moveY) layer->stopAction(fields->m_moveY);
                 fields->m_moveY = CCEaseOut::create(CCCallbackAction::create(CCMoveToY::create(0.1f, fields->m_targetPos.y), [this, fields] (auto target) {
                     m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
+                    constrainGameLayerPosition();
                 }), 1.2f);
                 layer->runAction(fields->m_moveY);
             }
@@ -168,6 +226,7 @@ void InputEditorUI::onScroll(float x, float y) {
                 fields->m_scale = CCEaseOut::create(CCCallbackAction::create(CCScaleTo::create(0.1f, fields->m_targetScale), [this, fields] (auto target) {
                     m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
                     updateZoom(m_editorLayer->m_objectLayer->getScale());
+                    constrainGameLayerPosition();
                 }), 1.2f);
                 layer->runAction(fields->m_scale);
             }
@@ -180,14 +239,11 @@ void InputEditorUI::onScroll(float x, float y) {
 
             m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
             updateZoom(m_editorLayer->m_objectLayer->getScale());
+            constrainGameLayerPosition();
         }
 
         return;
     }
-
-    #ifdef GEODE_IS_WINDOWS
-        x *= -1;
-    #endif
 
     if (!fields->m_activeScroll) {
         fields->m_targetPos = layer->getPosition();
@@ -195,8 +251,15 @@ void InputEditorUI::onScroll(float x, float y) {
         fields->m_activeScroll = true;
     }
 
-    float newX = x * getScrollMultiplier();
-    float newY = y * getScrollMultiplier();
+    float newX = (x * getScrollMultiplier()) * xMult;
+    float newY = (y * getScrollMultiplier()) * yMult;
+
+    if (invertVerticalScroll()) {
+        newY *= -1;
+    }
+    if (invertHorizontalScroll()) {
+        newX *= -1;
+    }
 
     auto newPos = tinker::utils::rotatePointAroundPivot({newX, newY}, {0, 0}, m_editorLayer->m_gameState.m_cameraAngle);
 
@@ -208,6 +271,7 @@ void InputEditorUI::onScroll(float x, float y) {
             if (fields->m_moveX) layer->stopAction(fields->m_moveX);
             fields->m_moveX = CCEaseOut::create(CCCallbackAction::create(CCMoveToX::create(0.1f, fields->m_targetPos.x), [this, fields] (auto target) {
                 m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
+                constrainGameLayerPosition();
             }), 1.2f);
             layer->runAction(fields->m_moveX);
         }
@@ -215,6 +279,7 @@ void InputEditorUI::onScroll(float x, float y) {
             if (fields->m_moveY) layer->stopAction(fields->m_moveY);
             fields->m_moveY = CCEaseOut::create(CCCallbackAction::create(CCMoveToY::create(0.1f, fields->m_targetPos.y), [this, fields] (auto target) {
                 m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
+                constrainGameLayerPosition();
             }), 1.2f);
             layer->runAction(fields->m_moveY);
         }
@@ -223,6 +288,7 @@ void InputEditorUI::onScroll(float x, float y) {
         fields->m_activeScroll = false;
         layer->setPosition(fields->m_targetPos);
         m_swipeStart = m_editorLayer->m_objectLayer->convertToWorldSpace(fields->m_startSwipe);
+        constrainGameLayerPosition();
     }
 }
 
