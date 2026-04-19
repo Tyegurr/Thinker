@@ -1,3 +1,8 @@
+# 1.0.0-beta.25
+- <c-dddddd>Disable scroll on tabs that don't have many buttons</c>
+- <c-dddddd>Increase tab scroll delta on mobile</c>
+- <c-dddddd>Check if slider in editor actually exists</c>
+
 # 1.0.0-beta.24
 - <c-dddddd>Free move now works when the camera is rotated</c>
 - <c-dddddd>Added button and keybind to move selected objects to your editor position</c>

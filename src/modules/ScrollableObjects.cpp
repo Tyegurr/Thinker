@@ -300,7 +300,11 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     fields->m_scrollLayer->setVerticalScroll(false);
     fields->m_scrollLayer->setTouchPriority(-130);
     fields->m_scrollLayer->setID("buttons-scroll-layer"_spr);
+    #ifdef GEODE_IS_MOBILE
+    fields->m_scrollLayer->setScrollDelta(2.5f);
+    #else
     fields->m_scrollLayer->setScrollDelta(1.5f);
+    #endif
     
     fields->m_scrollLayer->setCullingMethod([this, fields](CCNode* content, const CCPoint& scroll) {
         cull(fields, scroll.x);
@@ -346,8 +350,10 @@ void SOEditButtonBar::loadFromItems(cocos2d::CCArray* objects, int columns, int 
     if (!larger && m_tabIndex != 13) {
         fields->m_objectsMenu->setContentWidth((fields->m_scrollLayer->getContentWidth() - 20) / scale);
 
+        fields->m_scrollLayer->setHorizontalScroll(false);
+        
         fields->m_scrollLayout->setAxisAlignment(AxisAlignment::Center);
-
+        
         auto rowLayout = RowLayout::create();
         rowLayout->setAutoScale(false);
         rowLayout->setGrowCrossAxis(true);

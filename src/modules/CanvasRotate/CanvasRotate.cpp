@@ -63,6 +63,8 @@ void CREditorUI::moveObject(GameObject* object, CCPoint offset) {
 
 void CREditorUI::updateSliderRotation(float dt) {
     if (!CanvasRotate::getSetting<bool, "rotate-slider-thumb">()) return;
+    if (!m_positionSlider) return;
+    if (!m_positionSlider->getThumb()) return;
 
     m_positionSlider->getThumb()->setRotation(m_editorLayer->m_gameState.m_cameraAngle);
 }
