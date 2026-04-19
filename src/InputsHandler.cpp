@@ -95,6 +95,14 @@ bool InputEditorUI::isNaturalScrollEnabled() {
 #endif
 
 void InputEditorUI::onScroll(float x, float y) {
+    auto quickVolume = CCScene::get()->getChildByID("hjfod.quick-volume-controls/overlay");
+    if (quickVolume) {
+        auto scale9 = quickVolume->getChildByType<CCScale9Sprite>(0);
+        if (scale9->getOpacity() != 0) return;
+    }
+    auto editorPause = m_editorLayer->getChildByType<EditorPauseLayer>(0);
+    if (editorPause) return;
+
     using namespace tinker::utils;
     auto fields = m_fields.self();
 
