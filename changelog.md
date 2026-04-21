@@ -1,3 +1,10 @@
+# 1.0.0-beta.26
+- <c-dddddd>Fix preview object colors affecting object search permanently</c>
+- <c-dddddd>Fix object search loading circle position</c>
+- <c-dddddd>Add start playtest from startpos button</c>
+- <c-dddddd>Allow wave to clip through slopes when ignore damage is enabled</c>
+- <c-dddddd>Only show negate button when text field is focused</c>
+
 # 1.0.0-beta.25
 - <c-dddddd>Disable scroll on tabs that don't have many buttons</c>
 - <c-dddddd>Increase tab scroll delta on mobile</c>

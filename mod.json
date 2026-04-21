@@ -8,7 +8,7 @@
 	},
 	"id": "alphalaneous.tinker",
 	"name": "Tinker",
-	"version": "v1.0.0-beta.25",
+	"version": "v1.0.0-beta.26",
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
@@ -225,6 +225,12 @@
 			"name": "Enable Transform Control Fixes",
 			"description": "Fix the touch issues with Transform and Scale controls."
 		},
+		"FixIgnoreDamage-enabled": {
+			"type": "bool",
+			"default": true,
+			"name": "Fix Wave in Ignore Damage",
+			"description": "Fix wave sliding on slopes instead of clipping through them when ignore damage is enabled."
+		},
 		"FixTextObjectBounds-enabled": {
 			"type": "bool",
 			"default": true,
@@ -245,6 +251,12 @@
 			"default": false,
 			"name": "Hide IDs in the Edit Level screen",
 			"description": "Hide IDs in Edit Level screen, hold shift to show them."
+		},
+		"StartPosTools-enabled": {
+			"type": "bool",
+			"default": true,
+			"name": "Show button to playtest from selected Start Position",
+			"description": "Show an overlay above start positions when selected with a button to playtest from it."
 		},
 		"stop-swipe-on-shift-release": {
 			"type": "bool",

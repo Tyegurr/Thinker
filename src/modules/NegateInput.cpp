@@ -1,4 +1,5 @@
 #include "NegateInput.hpp"
+#include "Geode/cocos/cocoa/CCObject.h"
 
 bool NECCTextInputNode::allowedInput() {
     if (!LevelEditorLayer::get()) return false;
@@ -15,31 +16,35 @@ bool NECCTextInputNode::init(float width, float height, char const* placeholder,
 
     runAction(CallFuncExt::create([this] {
         if (!allowedInput() || !NegateInput::getSetting<bool, "show-negate-button">()) return;
-        auto menu = CCMenu::create();
-        menu->setAnchorPoint({0.f, 0.5f});
-        menu->ignoreAnchorPointForPosition(false);
-        menu->setPosition((getContentSize()/2) - 4);
-        menu->setContentSize({12, 12});
-        menu->setID("negate-menu"_spr);
+
+        auto fields = m_fields.self();
 
         auto spr = CCSprite::createWithSpriteFrameName("edit_delCBtn_001.png");
 
         auto btnSpr = ButtonSprite::create(spr, 30, 1, 30, 1, false, "GJ_button_06.png", false);
         btnSpr->setScale(0.3f);
 
-        auto btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this] (auto sender) {
+        fields->m_button = geode::Button::createWithNode(btnSpr, [this] (auto sender) {
             onNegate();
         });
 
-        btn->setPosition(menu->getContentSize()/2);
-        btn->setID("negate-button"_spr);
+        fields->m_button->setID("negate-button"_spr);
 
-        menu->addChild(btn);
+        fields->m_button->setPosition(getContentSize() / 2 + CCPoint{1, -3});
 
-        addChild(menu);
+        schedule(schedule_selector(NECCTextInputNode::showOnFocus));
+
+        addChild(fields->m_button);
     }));
 
     return true;
+}
+
+void NECCTextInputNode::showOnFocus(float dt) {
+    auto fields = m_fields.self();
+    if (fields->m_button) {
+        fields->m_button->setVisible(m_selected);
+    }
 }
 
 bool NECCTextInputNode::onTextFieldInsertText(CCTextFieldTTF* pSender, char const* text, int nLen, enumKeyCodes keyCodes) {

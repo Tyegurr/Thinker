@@ -12,8 +12,6 @@ class $editorModule(PreviewObjectColors) {
 		GLubyte opacity;
 	};
 
-    Ref<GameObject> m_defaultObject;
-
     void onEditor() override;
     void onSave() override;
     void onUpdateButtons() override;
@@ -21,6 +19,10 @@ class $editorModule(PreviewObjectColors) {
 
 class $modify(POCEditorUI, EditorUI) {
     $registerEditorHooks(PreviewObjectColors, true)
+
+    struct Fields {
+        Ref<GameObject> m_defaultObject;
+    };
 
     void editObject(cocos2d::CCObject* sender);
     GameObject* createObject(int objectID, cocos2d::CCPoint position);

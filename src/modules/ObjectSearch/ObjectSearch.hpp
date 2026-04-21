@@ -23,6 +23,7 @@ class $modify(OSEditorUI, EditorUI) {
     bool init(LevelEditorLayer* editorLayer);
     void updateCreateMenu(bool selectTab);
     CreateMenuItem* getCreateBtn(int id, int bg);
+    void updateButton(CCNode* btn, int color1ID, int color2ID, const cocos2d::ccHSVValue& hsv1, const cocos2d::ccHSVValue& hsv2);
     void onPause(CCObject* sender);
     void finish();
     void updateBatch(float dt);

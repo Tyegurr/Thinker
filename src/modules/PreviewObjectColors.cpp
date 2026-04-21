@@ -5,19 +5,22 @@
 void PreviewObjectColors::onEditor() {
     auto savedObj = alpha::level_storage::getSavedValue<std::string>(m_editorLayer, "color-object");
 
+    auto editorUI = static_cast<POCEditorUI*>(m_editorUI);
+    auto fields = editorUI->m_fields.self();
+
     if (!savedObj.empty()) {
         auto objects = m_editorLayer->createObjectsFromString(savedObj, true, true);
-        m_defaultObject = static_cast<GameObject*>(objects->firstObject());
-        m_editorUI->deleteObject(m_defaultObject, true);
+        fields->m_defaultObject = static_cast<GameObject*>(objects->firstObject());
+        m_editorUI->deleteObject(fields->m_defaultObject, true);
     }
     else {
-        m_defaultObject = GameObject::createWithKey(207);
-        m_defaultObject->m_baseColor = new GJSpriteColor();
-        m_defaultObject->m_detailColor = new GJSpriteColor();
+        fields->m_defaultObject = GameObject::createWithKey(207);
+        fields->m_defaultObject->m_baseColor = new GJSpriteColor();
+        fields->m_defaultObject->m_detailColor = new GJSpriteColor();
     }
 
-    m_defaultObject->m_baseColor->m_defaultColorID = 0;
-    m_defaultObject->m_detailColor->m_defaultColorID = 0;
+    fields->m_defaultObject->m_baseColor->m_defaultColorID = 0;
+    fields->m_defaultObject->m_detailColor->m_defaultColorID = 0;
 
     m_editorUI->schedule(schedule_selector(POCEditorUI::updateObjectColors));
 
@@ -28,8 +31,8 @@ void PreviewObjectColors::onEditor() {
             if (auto bar = typeinfo_cast<EditButtonBar*>(child)) {
                 if (!bar->m_hasCreateItems) continue;
                 auto soBar = static_cast<SOEditButtonBar*>(bar);
-                auto btn = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_editHSVBtn2_001.png", 1, [this] (CCMenuItemSpriteExtra* sender) {
-                    auto customizeObjectLayer = CustomizeObjectLayer::create(m_defaultObject, nullptr);
+                auto btn = CCMenuItemExt::createSpriteExtraWithFrameName("GJ_editHSVBtn2_001.png", 1, [this, fields] (CCMenuItemSpriteExtra* sender) {
+                    auto customizeObjectLayer = CustomizeObjectLayer::create(fields->m_defaultObject, nullptr);
                     customizeObjectLayer->show();
                 });
                 soBar->addToExtrasMenu(btn);
@@ -39,7 +42,9 @@ void PreviewObjectColors::onEditor() {
 }
 
 void PreviewObjectColors::onSave() {
-    alpha::level_storage::setSavedValue(m_editorLayer, "color-object", std::string(m_defaultObject->getSaveString(m_editorLayer)));
+    auto editorUI = static_cast<POCEditorUI*>(m_editorUI);
+    auto fields = editorUI->m_fields.self();
+    alpha::level_storage::setSavedValue(m_editorLayer, "color-object", std::string(fields->m_defaultObject->getSaveString(m_editorLayer)));
 }
 
 void PreviewObjectColors::onUpdateButtons() {
@@ -52,9 +57,10 @@ void PreviewObjectColors::onUpdateButtons() {
 
 void POCEditorUI::editObject(cocos2d::CCObject* sender) {
     if (ScrollableObjects::isEnabled()) return EditorUI::editObject(sender);
+    auto fields = m_fields.self();
 
     if (!m_selectedObject && (!m_selectedObjects || m_selectedObjects->count() == 0)) {
-        auto customizeObjectLayer = CustomizeObjectLayer::create(PreviewObjectColors::get()->m_defaultObject, nullptr);
+        auto customizeObjectLayer = CustomizeObjectLayer::create(fields->m_defaultObject, nullptr);
         customizeObjectLayer->show();
     }
     else {
@@ -67,7 +73,9 @@ GameObject* POCEditorUI::createObject(int objectID, cocos2d::CCPoint position) {
 
     if (!isColorable(ret)) return ret;
 
-    auto defaultObject = PreviewObjectColors::get()->m_defaultObject;
+    auto fields = m_fields.self();
+
+    auto defaultObject = fields->m_defaultObject;
     if (!defaultObject) return ret;
 
     int baseColorID = defaultObject->m_baseColor->m_colorID;
@@ -178,10 +186,10 @@ bool POCEditorUI::isColorable(GameObject* object) {
 }
 
 void POCEditorUI::updateButton(CCNode* btn) {
-    auto defaultObject = PreviewObjectColors::get()->m_defaultObject;
+    auto fields = m_fields.self();
 
-    auto detailColorData = getActiveColor(defaultObject->m_detailColor->m_colorID);
-    auto baseColorData = getActiveColor(defaultObject->m_baseColor->m_colorID);
+    auto detailColorData = getActiveColor(fields->m_defaultObject->m_detailColor->m_colorID);
+    auto baseColorData = getActiveColor(fields->m_defaultObject->m_baseColor->m_colorID);
 
     if (auto btnSprite = btn->getChildByType<ButtonSprite>(0)) {
         for (auto child : btnSprite->getChildrenExt()) {
@@ -189,14 +197,14 @@ void POCEditorUI::updateButton(CCNode* btn) {
                 if (!isColorable(gameObject)) return;
                 
                 if (auto baseColor = gameObject->m_baseColor) {
-                    baseColor->m_colorID = defaultObject->m_baseColor->m_colorID;
-                    baseColor->m_hsv = defaultObject->m_baseColor->m_hsv;
+                    baseColor->m_colorID = fields->m_defaultObject->m_baseColor->m_colorID;
+                    baseColor->m_hsv = fields->m_defaultObject->m_baseColor->m_hsv;
 
                     auto color = ccColor3B{255, 255, 255};
                     bool blending = false;
                     gameObject->updateHSVState();
 
-                    if (defaultObject->m_baseColor->m_colorID != 0) {
+                    if (fields->m_defaultObject->m_baseColor->m_colorID != 0) {
                         color = baseColorData.color;
                         blending = baseColorData.blending;
                         baseColor->m_opacity = baseColorData.opacity;
@@ -243,14 +251,14 @@ void POCEditorUI::updateButton(CCNode* btn) {
                     gameObject->updateMainColor(color);
                 }
                 if (auto detailColor = gameObject->m_detailColor) {
-                    detailColor->m_colorID = defaultObject->m_detailColor->m_colorID;
-                    detailColor->m_hsv = defaultObject->m_detailColor->m_hsv;
+                    detailColor->m_colorID = fields->m_defaultObject->m_detailColor->m_colorID;
+                    detailColor->m_hsv = fields->m_defaultObject->m_detailColor->m_hsv;
 
                     auto color = ccColor3B{200, 200, 255};
                     bool blending = false;
                     gameObject->updateHSVState();
 
-                    if (defaultObject->m_detailColor->m_colorID != 0) {
+                    if (fields->m_defaultObject->m_detailColor->m_colorID != 0) {
                         color = detailColorData.color;
                         blending = detailColorData.blending;
                         detailColor->m_opacity = detailColorData.opacity;
@@ -313,7 +321,7 @@ void POCEditorUI::updateButton(CCNode* btn) {
     }
 }
 
-void POCEditorUI::updateObjectColors(float dt) {
+void POCEditorUI::updateObjectColors(float dt) {    
     for (auto child : getChildrenExt()) {
         if (auto bar = typeinfo_cast<EditButtonBar*>(child)) {
             if (!bar->isVisible()) continue;
