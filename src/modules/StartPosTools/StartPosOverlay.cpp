@@ -37,6 +37,7 @@ bool StartPosOverlay::init() {
         EditorUI::get()->onPlaytest(sender);
     });
     m_button->setScale(0.8f);
+    m_button->setID("playtest-button"_spr);
 
     m_background->addChild(m_button);
     m_button->setPosition(getContentSize() / 2);
