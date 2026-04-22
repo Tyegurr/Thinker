@@ -1,3 +1,7 @@
+# 1.0.0-beta.28
+- <c-dddddd>Fix a crash when pressing enter to playtest</c>
+- <c-dddddd>Fix playtest menu when BetterEdit is disabled</c>
+
 # 1.0.0-beta.27
 - <c-dddddd>Fix cycling start position selections not working consistently</c>
 - <c-dddddd>Fix the start pos playtest button showing under the ground</c>

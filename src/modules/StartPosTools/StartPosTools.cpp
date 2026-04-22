@@ -27,8 +27,8 @@ void StartPosTools::onEditor() {
         }
         playtestMenu->addChild(fields->m_startPosBtn);
         playtestMenu->updateLayout();
-        editorUI->updatePlaytestMenu();
     }
+    editorUI->updatePlaytestMenu();
 }
 
 void StartPosTools::updateOverlay() {
@@ -45,10 +45,11 @@ void SPTEditorUI::updatePlaytestMenu() {
     runAction(CallFuncExt::create([this] {
         auto playtestMenu = getChildByID("playtest-menu");
         if (playtestMenu) {
+            playtestMenu->setAnchorPoint({0, 0.5f});
             playtestMenu->updateLayout();
             auto playbackMenu = getChildByID("playback-menu");
             if (playbackMenu) {
-                playtestMenu->setPositionX(playbackMenu->getPositionX());
+                playtestMenu->setPositionX(playbackMenu->boundingBox().getMinX());
             }
             auto objectInfoLabel = getChildByID("object-info-label");
             if (objectInfoLabel) {
@@ -74,7 +75,7 @@ void SPTEditorUI::onDeleteStartPos(cocos2d::CCObject* sender) {
 
 void SPTEditorUI::onPlaytest(cocos2d::CCObject* sender) {
     auto fields = m_fields.self();
-    if (sender->getTag() != 1) {
+    if (!sender || sender->getTag() != 1) {
         fields->m_fromStart = true;
     }
     EditorUI::onPlaytest(sender);
