@@ -123,7 +123,7 @@ bool SPTEditorUI::init(LevelEditorLayer* editorLayer) {
         }
         else {
             runAction(CallFuncExt::create([editorLayer] {
-                editorLayer->setStartPosIndex(editorLayer->indexForStartPos(editorLayer->findStartPosObject()) + 1);
+                editorLayer->setStartPosIndex(editorLayer->getStartPosCount());
             }));
         }
     }
