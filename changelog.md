@@ -1,3 +1,6 @@
+# 1.0.0-beta.33
+- <c-dddddd>Fix a crash</c>
+
 # 1.0.0-beta.32
 - <c-dddddd>Fix startpos switcher just not working consistently</c>
 - <c-dddddd>Add playtest confirmation option</c>
