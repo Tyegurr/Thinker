@@ -42,7 +42,6 @@ bool StartPosOverlay::init() {
         editorUI->m_fields->m_currentlyPlaying = true;
         levelEditorLayer->m_editorUI->onPlaytest(sender);
     });
-    m_button->setTag(1);
     m_button->setScale(0.8f);
     m_button->setID("playtest-button"_spr);
 

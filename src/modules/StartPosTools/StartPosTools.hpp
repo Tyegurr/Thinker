@@ -65,6 +65,8 @@ class $modify(SPTLevelEditorLayer, LevelEditorLayer) {
 
     void prevStartPos();
     void nextStartPos();
+    void setHasSwitched();
+    bool hasSwitched();
 
     void restartFromStartPos();
     unsigned int getStartPosCount();

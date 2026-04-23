@@ -8,7 +8,7 @@
 	},
 	"id": "alphalaneous.tinker",
 	"name": "Tinker",
-	"version": "v1.0.0-beta.30",
+	"version": "v1.0.0-beta.31",
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
@@ -121,6 +121,12 @@
 			"description": "How far you can zoom in when scrolling.",
 			"min": 2,
 			"max": 10000000
+		},
+		"scroll-delegate-to-vanilla": {
+			"type": "bool",
+			"default": false,
+			"name": "Delegate Custom Scroll to Vanilla",
+			"description": "Pass the scroll parameters to the vanilla EditorUI::scrollWheel method. This can help with compatibility with DevTools, but will yield issues with other mods that change scroll."
 		},
 		"ignore-natural-scrolling": {
 			"type": "bool",
@@ -760,6 +766,11 @@
 			"type": "keybind",
 			"default": ["E"],
 			"category": "editor"
+		},
+		"StartPosTools-hide-no-start-pos-button": {
+			"type": "bool",
+			"default": false,
+			"name": "Hide Playtest without Start Pos button"
 		},
 		"ThatPasteButton-title": {
 			"type": "title",

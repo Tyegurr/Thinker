@@ -1,3 +1,7 @@
+# 1.0.0-beta.31
+- <c-dddddd>Make playtest act like vanilla again, and turn the playtest from start pos button into a playtest without start pos button (Swapping the behavior)</c>
+- <c-dddddd>Make scroll delegation an option for compatibility sake, off by default</c>
+
 # 1.0.0-beta.30
 - <c-dddddd>Fix typo in changelog</c>
 - <c-dddddd>Only use scroll event to get points, trigger on scrollWheel call still</c>

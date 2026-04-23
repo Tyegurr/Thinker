@@ -9,6 +9,7 @@ using namespace tinker::ui;
 bool StartPosTools::onSettingChanged(std::string_view key, const matjson::Value& value) {
     if (key == "start-pos-switcher") return false;
     if (key == "auto-hide-switcher") return false;
+    if (key == "hide-no-start-pos-button") return false;
     return true;
 }
 
@@ -20,11 +21,13 @@ bool SPTEditorUI::init(LevelEditorLayer* editorLayer) {
 	fields->m_overlay->setID("start-pos-controls"_spr);
 	m_editorLayer->m_objectLayer->addChild(fields->m_overlay);
 
-    auto spr = CCSprite::create("playtest-start-pos.png"_spr);
-    spr->setScale(0.75f);
-    fields->m_startPosBtn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(SPTEditorUI::onPlaytest));
-    fields->m_startPosBtn->setTag(1);
-    m_uiItems->addObject(fields->m_startPosBtn);
+    if (!StartPosTools::getSetting<bool, "hide-no-start-pos-button">()) {
+        auto spr = CCSprite::create("playtest-start-pos.png"_spr);
+        spr->setScale(0.75f);
+        fields->m_startPosBtn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(SPTEditorUI::onPlaytest));
+        fields->m_startPosBtn->setTag(1);
+        m_uiItems->addObject(fields->m_startPosBtn);
+    }
 
     auto playtestMenu = getChildByID("playtest-menu");
     if (playtestMenu) {
@@ -34,8 +37,10 @@ bool SPTEditorUI::init(LevelEditorLayer* editorLayer) {
             layout->setAutoScale(false);
             layout->setAutoGrowAxis(0);
         }
-        playtestMenu->addChild(fields->m_startPosBtn);
-        playtestMenu->updateLayout();
+        if (!StartPosTools::getSetting<bool, "hide-no-start-pos-button">()) {
+            playtestMenu->addChild(fields->m_startPosBtn);
+            playtestMenu->updateLayout();
+        }
     }
     updatePlaytestMenu();
 
@@ -112,7 +117,13 @@ bool SPTEditorUI::init(LevelEditorLayer* editorLayer) {
             }
         );
         auto editorLayer = static_cast<SPTLevelEditorLayer*>(m_editorLayer);
-        editorLayer->setStartPosIndex(alpha::level_storage::getSavedValue<int>(editorLayer, "start-pos-index"));
+        auto saved = alpha::level_storage::getSaveContainer(editorLayer, Mod::get());
+        if (saved.contains("start-pos-index")) {
+            editorLayer->setStartPosIndex(alpha::level_storage::getSavedValue<int>(editorLayer, "start-pos-index"));
+        }
+        else {
+            editorLayer->setStartPosIndex(editorLayer->indexForStartPos(editorLayer->findStartPosObject()) + 1);
+        }
     }
 
     return true;
@@ -231,7 +242,7 @@ void SPTEditorUI::onPlaytest(cocos2d::CCObject* sender) {
         return;
     }
 
-    if (!sender || sender->getTag() == -1) {
+    if (!sender || sender->getTag() == 1) {
         fields->m_fromStart = true;
     }
 
@@ -363,6 +374,7 @@ void SPTLevelEditorLayer::restartFromStartPos() {
     if (!fields->m_fromStart) {
         fields->m_startPosIndexReal = fields->m_startPosIndex;
         alpha::level_storage::setSavedValue(this, "start-pos-index", fields->m_startPosIndexReal + 1);
+        setHasSwitched();
     }
 
     if (fields->m_startPosIndex == -1) {
@@ -400,6 +412,15 @@ void SPTLevelEditorLayer::startSwitcher(bool start) {
     }
 }
 
+void SPTLevelEditorLayer::setHasSwitched() {
+    auto fields = m_fields.self();
+    alpha::level_storage::setSavedValue(this, "has-switched-start-pos", true);
+}
+
+bool SPTLevelEditorLayer::hasSwitched() {
+    return alpha::level_storage::getSavedValue<bool>(this, "has-switched-start-pos");
+}
+
 void SPTLevelEditorLayer::setActiveStartPos(StartPosObject* startPos) {
     auto fields = m_fields.self();
     fields->m_activeStartPos = startPos;
@@ -410,13 +431,14 @@ void SPTLevelEditorLayer::setActiveStartPos(StartPosObject* startPos) {
         fields->m_startPosIndex = indexForStartPos(startPos);
         fields->m_startPosIndexReal = fields->m_startPosIndex;
         alpha::level_storage::setSavedValue(this, "start-pos-index", fields->m_startPosIndexReal + 1);
+        setHasSwitched();
     }
 }
 
 StartPosObject* SPTLevelEditorLayer::getActiveStartPos() {
     auto fields = m_fields.self();
 
-    if (!StartPosTools::getSetting<bool, "start-pos-switcher">() && fields->m_startPosIndex == -1) {
+    if ((!StartPosTools::getSetting<bool, "start-pos-switcher">() && fields->m_startPosIndex == -1) || (!hasSwitched() && !fields->m_fromStart)) {
         return findStartPosObject();
     }
 

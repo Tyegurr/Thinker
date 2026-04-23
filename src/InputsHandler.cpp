@@ -33,6 +33,9 @@ bool InputEditorUI::init(LevelEditorLayer* editorLayer) {
 
     addEventListener(ScrollWheelEvent(), [this, fields](double x, double y) {
         fields->m_scroll = CCPoint{static_cast<float>(x), static_cast<float>(y)};
+        if (!tinker::utils::getSetting<bool, "scroll-delegate-to-vanilla">()) {
+            onScroll();
+        }
     });
     addEventListener(KeybindSettingPressedEvent(Mod::get(), "ScrollableObjects-speed-modifier-key"), [this, fields] (Keybind const& keybind, bool down, bool repeat, double timestamp) {
         fields->m_tabModifierHeld = down;
@@ -312,6 +315,7 @@ void InputEditorUI::removeActiveAlert(FLAlertLayer* alert) {
 }
 
 void InputEditorUI::scrollWheel(float y, float x) {
+    if (!tinker::utils::getSetting<bool, "scroll-delegate-to-vanilla">()) return;
     onScroll();
 }
 
