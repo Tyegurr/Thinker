@@ -470,6 +470,9 @@ void SPTLevelEditorLayer::setStartPosIndex(int idx) {
     sortStartPositions();
 
     auto fields = m_fields.self();
+    if (idx >= fields->m_startPositions.size()) {
+        idx = fields->m_startPositions.size();
+    }
     fields->m_startPosIndex = idx - 1;
     fields->m_startPosIndexReal = fields->m_startPosIndex;
     if (fields->m_startPosIndex == -1 || fields->m_startPositions.empty()) {
