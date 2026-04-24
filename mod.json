@@ -8,12 +8,12 @@
 	},
 	"id": "alphalaneous.tinker",
 	"name": "Tinker",
-	"version": "v1.0.0-beta.35",
+	"version": "v1.0.0-beta.36",
 	"developer": "Alphalaneous",
 	"description": "Editor Revamped",
 	"dependencies": {
 		"geode.node-ids": "v1.23.3",
-		"alphalaneous.good_grid": "v1.1.4",
+		"alphalaneous.good_grid": "v1.2.0",
 		"alphalaneous.alphas_geode_utils": "v1.2.4",
 		"alphalaneous.alphas-ui-pack": "v1.1.0",
 		"alphalaneous.editortab_api": "v2.1.0",
@@ -832,6 +832,62 @@
 			"default": false,
 			"name": "Always show Edit Extras button",
 			"description": "Make the Edit Extras button always visible instead of replacing Edit Special."
+		},
+		"EditorGridCustomization-title": {
+			"type": "title",
+			"name": "Editor Grid Customization"
+		},
+		"EditorGridCustomization-description": {
+			"type": "info",
+			"description": "Customize the colors of the editor grid",
+			"color": "#000000"
+		},
+		"EditorGridCustomization-grid-color": {
+			"type": "rgba",
+			"default": [0, 0, 0, 150],
+			"name": "Grid Color"
+		},
+		"EditorGridCustomization-grid-invert": {
+			"type": "bool",
+			"name": "Grid Inverts Behind",
+			"description": "Make the grid invert the color behind it rather than a static color. (Overrides Grid Color setting)",
+			"default": false
+		},
+		"EditorGridCustomization-effect-line-color": {
+			"type": "rgba",
+			"default": [0, 255, 255, 255],
+			"name": "Effect Line Color"
+		},
+		"EditorGridCustomization-color-effect-lines-by-trigger": {
+			"type": "bool",
+			"name": "Color Effect Lines by Trigger Color",
+			"default": false
+		},
+		"EditorGridCustomization-music-line-active-color": {
+			"type": "rgba",
+			"default": [50, 255, 50, 255],
+			"name": "Music Line Active Color"
+		},
+		"EditorGridCustomization-music-line-inactive-color": {
+			"type": "rgba",
+			"default": [2, 255, 2, 100],
+			"name": "Music Line Inactive Color"
+		},
+		"EditorGridCustomization-rainbow-music-line": {
+			"type": "bool",
+			"name": "Rainbow Music Line",
+			"description": "Just for fun :3",
+			"default": false
+		},
+		"EditorGridCustomization-center-line-color": {
+			"type": "rgba",
+			"default": [0, 0, 0, 50],
+			"name": "Center Line Color"
+		},
+		"EditorGridCustomization-preview-lock-line-color": {
+			"type": "rgba",
+			"default": [255, 150, 0, 255 ],
+			"name": "Preview Lock Line Color"
 		},
 		"Keybinds-title": {
 			"type": "title",

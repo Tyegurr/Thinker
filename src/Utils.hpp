@@ -214,4 +214,107 @@ namespace tinker::utils {
         });
         return setting;
     }
+
+    template<class S, geode::utils::string::ConstexprString key, auto Callback = nullptr>
+    void onSetting() {
+        static auto listener = listenForSettingChanges<S>(key.data(), [] (S value) {
+            if constexpr (Callback) {
+                Callback(value);
+            }
+        });
+        if constexpr (Callback) {
+            Callback(getSetting<S, key>());
+        }
+    }
+
+    namespace color {
+        struct RGB {
+            float r, g, b;
+        };
+
+        struct HSV {
+            float h;
+            float s;
+            float v;
+        };
+
+        constexpr float clamp01(float v) {
+            return std::clamp(v, 0.0f, 1.0f);
+        }
+
+        inline float wrapDegrees(float h) {
+            h = std::fmod(h, 360.0f);
+            if (h < 0.0f) h += 360.0f;
+            return h;
+        }
+
+        inline HSV rgbToHsv(RGB in) {
+            const float max = std::max({in.r, in.g, in.b});
+            const float min = std::min({in.r, in.g, in.b});
+            const float delta = max - min;
+
+            HSV out{};
+            out.v = max;
+
+            if (max == 0.0f) {
+                out.s = 0.0f;
+                out.h = 0.0f;
+                return out;
+            }
+
+            out.s = delta / max;
+
+            if (delta == 0.0f) {
+                out.h = 0.0f;
+            } else if (max == in.r) {
+                out.h = 60.0f * std::fmod((in.g - in.b) / delta, 6.0f);
+            } else if (max == in.g) {
+                out.h = 60.0f * (((in.b - in.r) / delta) + 2.0f);
+            } else {
+                out.h = 60.0f * (((in.r - in.g) / delta) + 4.0f);
+            }
+
+            if (out.h < 0.0f) out.h += 360.0f;
+            return out;
+        }
+
+        inline RGB hsvToRgb(HSV in) {
+            const float c = in.v * in.s;
+            const float hPrime = in.h / 60.0f;
+            const float x = c * (1.0f - std::fabs(std::fmod(hPrime, 2.0f) - 1.0f));
+            const float m = in.v - c;
+
+            float r1 = 0.0f, g1 = 0.0f, b1 = 0.0f;
+
+            if (hPrime < 1.0f)       { r1 = c; g1 = x; }
+            else if (hPrime < 2.0f)  { r1 = x; g1 = c; }
+            else if (hPrime < 3.0f)  { g1 = c; b1 = x; }
+            else if (hPrime < 4.0f)  { g1 = x; b1 = c; }
+            else if (hPrime < 5.0f)  { r1 = x; b1 = c; }
+            else                     { r1 = c; b1 = x; }
+
+            return { r1 + m, g1 + m, b1 + m };
+        }
+
+        inline cocos2d::ccColor4B hueShift(cocos2d::ccColor4B color, float shiftDegrees) {
+            RGB rgb {
+                color.r / 255.0f,
+                color.g / 255.0f,
+                color.b / 255.0f
+            };
+
+            HSV hsv = rgbToHsv(rgb);
+            hsv.h = wrapDegrees(hsv.h + shiftDegrees);
+
+            RGB out = hsvToRgb(hsv);
+
+            return cocos2d::ccColor4B{
+                static_cast<std::uint8_t>(clamp01(out.r) * 255.0f),
+                static_cast<std::uint8_t>(clamp01(out.g) * 255.0f),
+                static_cast<std::uint8_t>(clamp01(out.b) * 255.0f),
+                color.a
+            };
+        }
+
+    }
 }

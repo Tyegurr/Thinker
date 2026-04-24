@@ -46,6 +46,8 @@ class $modify(SPTGJBaseGameLayer, GJBaseGameLayer) {
 };
 
 class $modify(SPTLevelEditorLayer, LevelEditorLayer) {
+    $registerGlobalHooks(StartPosTools)
+
     struct Fields {
         std::vector<Ref<StartPosObject>> m_startPositions;
         int m_startPosIndex = -1;

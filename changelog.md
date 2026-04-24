@@ -1,3 +1,11 @@
+# 1.0.0-beta.36
+- <c-dddddd>Add editor grid customization</c>
+  - <c-dddddd>Color customization</c>
+  - <c-dddddd>Grid Invert Behind option</c>
+  - <c-dddddd>Effect lines match trigger color option</c>
+  - <c-dddddd>Rainbow Music Line option :3</c>
+- <c-dddddd>Fix crash when placing start position with Start Pos Tools disabled</c>
+
 # 1.0.0-beta.35
 - <c-dddddd>Fix a crash</c>
 
